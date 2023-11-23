@@ -7,5 +7,5 @@ import javax.swing.*;
 class main extends JFrame //implements KeyListener 
 {
 //teesting testing
-//hi palm
+
 }
