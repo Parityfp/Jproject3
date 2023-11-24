@@ -43,20 +43,20 @@ class game extends Canvas implements Runnable // implements KeyListener
     }
 
     public static void main(String args[]) {
-        game game = new game();
+        // game game = new game();
 
-        game.setPreferredSize(new Dimension(WIDTH * SCALE, HEIGHT * SCALE));
+        // game.setPreferredSize(new Dimension(WIDTH * SCALE, HEIGHT * SCALE));
 
-        JFrame frame = new JFrame(game.TITLE);
-        frame.add(game);
-        frame.pack();
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setResizable(false);
-        // frame.setLocationRelativeTo(null);
-        frame.setVisible(true);
+        // JFrame frame = new JFrame(game.TITLE);
+        // frame.add(game);
+        // frame.pack();
+        // frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        // frame.setResizable(false);
+        // // frame.setLocationRelativeTo(null);
+        // frame.setVisible(true);
         
 
-        game.start();
+        // game.start();
     }
 
     @Override
