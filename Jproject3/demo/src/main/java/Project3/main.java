@@ -84,5 +84,7 @@ class StartButton extends JButton implements MouseListener {
         gameFrame.setLocationRelativeTo(null);
         gameInstance.start();
 
+        //startmenu disappear
+        SwingUtilities.getWindowAncestor(this).setVisible(false);
     }
 }
