@@ -40,7 +40,6 @@ class game extends Canvas implements Runnable //implements KeyListener
     }
 
 
-
     public static void main(String args[]){
         game game = new game();
 
