@@ -13,6 +13,7 @@ class StartMenu extends JFrame {
     public StartMenu() {
         setTitle("Start Menu");
         setBounds(200, 200, 700, 300);
+        setLocationRelativeTo(null);
         setVisible(true);
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         contentPane = new JPanel();
@@ -23,7 +24,7 @@ class StartMenu extends JFrame {
         contentPane.add(startButton);
 
         setPreferredSize(new Dimension(700, 300));
-        setLocationRelativeTo(null);
+        
         pack();
         setVisible(true);
     }
