@@ -34,7 +34,11 @@ class StartMenu extends JFrame {
         tb[1].setName("Unmute");
         tb[0].setSelected(true);
 
-        
+
+        //ensure cant deselect
+        ButtonGroup buttonGroup = new ButtonGroup();
+        buttonGroup.add(tb[0]);
+        buttonGroup.add(tb[1]);
 
         // Set positions and add buttons to the content pane
         tb[0].setBounds(50, 100, 100, 30);

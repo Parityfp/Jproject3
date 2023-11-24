@@ -114,4 +114,6 @@ class game extends Canvas implements Runnable // implements KeyListener
 }
 
 
+class BufferedimageLoader {
 
+}
