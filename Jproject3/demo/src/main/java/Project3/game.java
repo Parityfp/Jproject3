@@ -19,7 +19,7 @@ class game extends Canvas implements Runnable // implements KeyListener
 
     private BufferedImage image = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
 
-    private synchronized void start() {
+    synchronized public void start() {
         if (running)
             return;
 
@@ -55,7 +55,7 @@ class game extends Canvas implements Runnable // implements KeyListener
         // frame.setLocationRelativeTo(null);
         frame.setVisible(true);
         
-        new StartMenu();
+
         game.start();
     }
 
@@ -113,56 +113,5 @@ class game extends Canvas implements Runnable // implements KeyListener
     }
 }
 
-class StartMenu extends JFrame {
 
-    private JPanel contentpane;
-    private StartButton startButton;
 
-    public StartMenu() {
-        setTitle("Start Menu");
-        setBounds(200, 200, 700, 300);
-        setVisible(true);
-        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-
-        contentpane = (JPanel) getContentPane();
-        contentpane.setLayout(null);
-
-        startButton = new StartButton();
-        contentpane.add(startButton);
-        repaint();
-    }
-}
-
-class StartButton extends JButton implements MouseListener {
-    private int curX = 100, curY = 20;
-    private int width = 100, height = 100;
-
-    private ImageIcon startImage;
-
-    public StartButton(ImageIcon icon) {
-        String path = "src/main/Java/Project3/";
-        startImage = new ImageIcon(path + "startButton.png");
-
-        setBounds(curX, curY, width, height);
-        setIcon(startImage);
-
-        addMouseListener(this);
-        addMouseMotionListener(this);
-    }
-
-    public void mousePressed(MouseEvent e) {
-    }
-
-    public void mouseReleased(MouseEvent e) {
-    }
-
-    public void mouseEntered(MouseEvent e) {
-    }
-
-    public void mouseExited(MouseEvent e) {
-    }
-
-    public void mouseClicked(MouseEvent e) {
-        System.out.println("Game Started");
-    }
-}
