@@ -85,33 +85,25 @@ class game extends Canvas implements Runnable // implements KeyListener
     @Override
     public void run() {
         init();
+        final int TICKS_PER_SECOND = 60;
+        final long TIME_PER_TICK = 1000000000 / TICKS_PER_SECOND;
         long lastTime = System.nanoTime();
-        final double fps = 60.0;
-        double ns = 1000000000 / fps;
-        double delta = 0;
-        int updates = 0;
-        int frames = 0;
-        long timer = System.currentTimeMillis();
-
+        long now;
+        long delta = 0;
+    
         while (running) {
-            long now = System.nanoTime();
-            delta += (now - lastTime) / ns;
+            now = System.nanoTime();
+            delta += (now - lastTime);
             lastTime = now;
-            if (delta >= 1) {
-                tick();
-                updates++;
-                delta--;
+    
+            while (delta >= TIME_PER_TICK) {
+                tick(); //tick
+                delta -= TIME_PER_TICK;
             }
-            render();
-            frames++;
-
-            if (System.currentTimeMillis() - timer > 1000) {
-                timer += 1000;
-                System.out.println(updates + " Ticks, Fps: " + frames);
-                updates = 0;
-                frames = 0;
-            }
+            
+            render(); //render
         }
+    
         stop();
     }
 
