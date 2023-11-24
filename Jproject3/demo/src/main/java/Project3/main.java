@@ -3,25 +3,29 @@ package Project3;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
+
 
 class StartMenu extends JFrame {
 
     private JPanel contentPane;
     private StartButton startButton;
     private JToggleButton []tb;
+    private JPanel contentpane;
+    private JLabel drawpane;
+    private ImageIcon backgroundImg;
 
     public StartMenu() {
         setTitle("Start Menu");
         setBounds(200, 200, 700, 300);
         setLocationRelativeTo(null);
         setVisible(true);
+        AddComponents();
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
-        contentPane = new JPanel();
-        setContentPane(contentPane);
-        contentPane.setLayout(null);
+        contentpane = (JPanel) getContentPane();
+        contentpane.setLayout(new BorderLayout());
+        
+        setContentPane(drawpane);
 
         startButton = new StartButton(null);
         contentPane.add(startButton);
@@ -37,12 +41,12 @@ class StartMenu extends JFrame {
         
 
         // Set positions and add buttons to the content pane
-        tb[0].setBounds(50, 100, 100, 30);
-        tb[1].setBounds(200, 100, 100, 30);
+        tb[0].setBounds(40, 100, 100, 30);
+        tb[1].setBounds(140, 100, 100, 30);
         contentPane.add(tb[0]);
         contentPane.add(tb[1]);
 
-        tb[0].addItemListener(new ItemListener() {
+        tb[0].addItemListener(new ItemListener() {//Mute button
             @Override
             public void itemStateChanged(ItemEvent e) {
                 if (e.getStateChange() == ItemEvent.SELECTED) {
@@ -51,7 +55,7 @@ class StartMenu extends JFrame {
             }
         });
 
-        tb[1].addItemListener(new ItemListener() {
+        tb[1].addItemListener(new ItemListener() {//Unmute button
             @Override
             public void itemStateChanged(ItemEvent e) {
                 if (e.getStateChange() == ItemEvent.SELECTED) {
@@ -64,6 +68,16 @@ class StartMenu extends JFrame {
 
         pack();
         setVisible(true);
+    }
+
+    private void AddComponents() {
+        final String FILE_BG = "C:/Users/Admin/OneDrive/Desktop/MUIC/Paradigms/Jproject3/Jproject3/demo/src/main/java/Project3/spaceBG.png";//file path
+
+        backgroundImg = new ImageIcon(FILE_BG);
+        drawpane = new JLabel();
+        drawpane.setIcon(backgroundImg);
+        drawpane.setLayout(null); // You can set the layout manager if required
+        // Add other components to drawpane if needed
     }
 
     public static void main(String[] args) {
