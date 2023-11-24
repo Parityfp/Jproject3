@@ -14,7 +14,6 @@ class StartMenu extends JFrame {
         setTitle("Start Menu");
         setBounds(200, 200, 700, 300);
         setLocationRelativeTo(null);
-        setVisible(true);
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         contentPane = new JPanel();
         setContentPane(contentPane);
@@ -88,4 +87,3 @@ class StartButton extends JButton implements MouseListener {
         SwingUtilities.getWindowAncestor(this).setVisible(false);
     }
 }
-    
