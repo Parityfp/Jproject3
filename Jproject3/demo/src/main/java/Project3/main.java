@@ -2,6 +2,7 @@ package Project3;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
@@ -9,12 +10,15 @@ class StartMenu extends JFrame {
 
     private JPanel contentPane;
     private StartButton startButton;
+    private JToggleButton []tb;
 
     public StartMenu() {
         setTitle("Start Menu");
         setBounds(200, 200, 700, 300);
+        setLocationRelativeTo(null);
         setVisible(true);
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+
         contentPane = new JPanel();
         setContentPane(contentPane);
         contentPane.setLayout(null);
@@ -22,8 +26,42 @@ class StartMenu extends JFrame {
         startButton = new StartButton(null);
         contentPane.add(startButton);
 
+         // Create mute and unmute toggle buttons
+        tb = new JToggleButton[2];
+        tb[0] = new JRadioButton("Mute");
+        tb[0].setName("Mute");
+        tb[1] = new JRadioButton("Unmute");
+        tb[1].setName("Unmute");
+        tb[0].setSelected(true);
+
+        
+
+        // Set positions and add buttons to the content pane
+        tb[0].setBounds(50, 100, 100, 30);
+        tb[1].setBounds(200, 100, 100, 30);
+        contentPane.add(tb[0]);
+        contentPane.add(tb[1]);
+
+        tb[0].addItemListener(new ItemListener() {
+            @Override
+            public void itemStateChanged(ItemEvent e) {
+                if (e.getStateChange() == ItemEvent.SELECTED) {
+                    tb[1].setSelected(false); // Deselect the other button
+                }
+            }
+        });
+
+        tb[1].addItemListener(new ItemListener() {
+            @Override
+            public void itemStateChanged(ItemEvent e) {
+                if (e.getStateChange() == ItemEvent.SELECTED) {
+                    tb[0].setSelected(false); // Deselect the other button
+                }
+            }
+        });
+
         setPreferredSize(new Dimension(700, 300));
-        setLocationRelativeTo(null);
+
         pack();
         setVisible(true);
     }
@@ -37,16 +75,21 @@ class StartMenu extends JFrame {
 
 class StartButton extends JButton implements MouseListener {
 
-    private int curX = 100, curY = 20;
-    private int width = 100, height = 100;
+    private int curX = 50, curY = 20;
+    private int width = 150, height = 60;
 
     private ImageIcon startImage;
     private game gameInstance;
+    
 
     public StartButton(game gameInstance) {
         // Load image from the resources
         String path = "src/main/java/Project3/";
         startImage = new ImageIcon(getClass().getResource("startButton.png"));
+        
+        // Resize the image to fit the button
+        Image scaledImage = startImage.getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH);
+        startImage = new ImageIcon(scaledImage);
 
         setBounds(curX, curY, width, height);
         setIcon(startImage);
@@ -79,9 +122,16 @@ class StartButton extends JButton implements MouseListener {
         gameFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         gameFrame.setResizable(false);
         gameFrame.pack();
-        gameFrame.setVisible(true);
         gameFrame.setLocationRelativeTo(null);
+        gameFrame.setVisible(true);
+        
+
         gameInstance.start();
 
     }
+
+    
 }
+
+    
+    

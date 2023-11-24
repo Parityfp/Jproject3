@@ -9,7 +9,7 @@ import javax.swing.*;
 
 class game extends Canvas implements Runnable // implements KeyListener
 {
-    public static final int WIDTH = 320;
+    public static final int WIDTH = 500;
     public static final int HEIGHT = WIDTH / 12 * 9;
     public static final int SCALE = 2;
     public static String TITLE = "game";
