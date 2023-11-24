@@ -41,8 +41,8 @@ class StartMenu extends JFrame {
         buttonGroup.add(tb[1]);
 
         // Set positions and add buttons to the content pane
-        tb[0].setBounds(50, 100, 100, 30);
-        tb[1].setBounds(200, 100, 100, 30);
+        tb[0].setBounds(40, 100, 100, 30);
+        tb[1].setBounds(140, 100, 100, 30);
         contentPane.add(tb[0]);
         contentPane.add(tb[1]);
 
