@@ -77,6 +77,7 @@ class StartMenu extends JFrame {
 
         setPreferredSize(new Dimension(700, 300));
 
+        
         pack();
         setVisible(true);
     }
