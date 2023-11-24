@@ -7,10 +7,10 @@ import java.awt.image.BufferedImage;
 
 import javax.swing.*;
 
-class game extends Canvas implements Runnable //implements KeyListener 
+class game extends Canvas implements Runnable // implements KeyListener
 {
     public static final int WIDTH = 320;
-    public static final int HEIGHT = WIDTH / 12*9;
+    public static final int HEIGHT = WIDTH / 12 * 9;
     public static final int SCALE = 2;
     public static String TITLE = "game";
 
@@ -19,42 +19,44 @@ class game extends Canvas implements Runnable //implements KeyListener
 
     private BufferedImage image = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
 
-    private synchronized void start(){
-        if(running) return;
+    synchronized public void start() {
+        if (running)
+            return;
 
         running = true;
         thread = new Thread(this);
         thread.start();
     }
 
-    private synchronized void stop(){
-        if(!running) return;
+    private synchronized void stop() {
+        if (!running)
+            return;
 
         running = false;
         try {
             thread.join();
         } catch (InterruptedException e) {
             e.printStackTrace();
-        };
+        }
+        ;
         System.exit(1);
     }
 
+    public static void main(String args[]) {
+        // game game = new game();
 
+        // game.setPreferredSize(new Dimension(WIDTH * SCALE, HEIGHT * SCALE));
 
-    public static void main(String args[]){
-        game game = new game();
-
-        game.setPreferredSize(new Dimension(WIDTH * SCALE, HEIGHT * SCALE));
-    
-        JFrame frame = new JFrame(game.TITLE);
-        frame.add(game);
-        frame.pack();
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setResizable(false);
-        //frame.setLocationRelativeTo(null);
-        frame.setVisible(true);
+        // JFrame frame = new JFrame(game.TITLE);
+        // frame.add(game);
+        // frame.pack();
+        // frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        // frame.setResizable(false);
+        // // frame.setLocationRelativeTo(null);
+        // frame.setVisible(true);
         
-        game.start();
+
+        // game.start();
     }
 
     @Override
@@ -67,12 +69,11 @@ class game extends Canvas implements Runnable //implements KeyListener
         int frames = 0;
         long timer = System.currentTimeMillis();
 
-
-        while(running){
+        while (running) {
             long now = System.nanoTime();
             delta += (now - lastTime) / ns;
             lastTime = now;
-            if(delta >= 1){
+            if (delta >= 1) {
                 tick();
                 updates++;
                 delta--;
@@ -80,7 +81,7 @@ class game extends Canvas implements Runnable //implements KeyListener
             render();
             frames++;
 
-            if(System.currentTimeMillis() - timer > 1000){
+            if (System.currentTimeMillis() - timer > 1000) {
                 timer += 1000;
                 System.out.println(updates + " Ticks, Fps: " + frames);
                 updates = 0;
@@ -90,13 +91,13 @@ class game extends Canvas implements Runnable //implements KeyListener
         stop();
     }
 
-    private void tick(){
+    private void tick() {
 
     }
 
-    private void render(){
+    private void render() {
         BufferStrategy bs = this.getBufferStrategy();
-        if(bs == null){
+        if (bs == null) {
             createBufferStrategy(3);
             return;
         }
@@ -111,3 +112,6 @@ class game extends Canvas implements Runnable //implements KeyListener
         bs.show();
     }
 }
+
+
+
