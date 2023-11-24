@@ -88,3 +88,4 @@ class StartButton extends JButton implements MouseListener {
         SwingUtilities.getWindowAncestor(this).setVisible(false);
     }
 }
+    
