@@ -8,13 +8,11 @@ class StartMenu extends JFrame {
 
     private JPanel contentPane;
     private StartButton startButton;
-    private JToggleButton []tb;
-    private JPanel contentpane;
+    private JToggleButton[] tb;
     private JLabel drawpane;
     private ImageIcon backgroundImg;
     private JTextField usernameField;
     private JPasswordField passwordField;
-
 
     public StartMenu() {
         setTitle("Start Menu");
@@ -30,13 +28,13 @@ class StartMenu extends JFrame {
         startButton = new StartButton(null);
         contentPane.add(startButton);
 
-        //Combo box for diffculties
-        String[] difficulties = {"Very easy", "Easy", "Medium", "Hard", "Lunatic"};
+        // Combo box for diffculties
+        String[] difficulties = { "Very easy", "Easy", "Medium", "Hard", "Lunatic" };
         JComboBox<String> difficultyComboBox = new JComboBox<>(difficulties);
-	    difficultyComboBox.setBounds(250,20,150,30);
+        difficultyComboBox.setBounds(250, 20, 150, 30);
         contentPane.add(difficultyComboBox);
 
-        //Username and Password
+        // Username and Password
         JPanel authPanel = new JPanel(new GridLayout(3, 2));
 
         authPanel.add(new JLabel("Username:"));
@@ -49,8 +47,7 @@ class StartMenu extends JFrame {
 
         authPanel.setBounds(50, 150, 300, 100);
         contentPane.add(authPanel);
-        
-        
+
         // Create mute and unmute toggle buttons
         tb = new JToggleButton[2];
         tb[0] = new JRadioButton("Mute");
@@ -59,8 +56,7 @@ class StartMenu extends JFrame {
         tb[1].setName("Unmute");
         tb[0].setSelected(true);
 
-
-        //ensure cant deselect
+        // ensure cant deselect
         ButtonGroup buttonGroup = new ButtonGroup();
         buttonGroup.add(tb[0]);
         buttonGroup.add(tb[1]);
@@ -91,19 +87,20 @@ class StartMenu extends JFrame {
 
         setPreferredSize(new Dimension(700, 300));
 
-        AddComponents();
+        AddBackground();
 
         pack();
         setVisible(true);
     }
 
-    private void AddComponents() {
-        final String FILE_BG = "src/main/Java/Project3/spaceBG.png";
-
-        backgroundImg = new ImageIcon(FILE_BG);
+    private void AddBackground() {
+        backgroundImg = new ImageIcon(getClass().getResource("spaceBG.png"));
         drawpane = new JLabel();
         drawpane.setIcon(backgroundImg);
         drawpane.setLayout(null);
+
+        drawpane.setBounds(0, 0, getWidth(), getHeight());
+        contentPane.add(drawpane);
     }
 
     public static void main(String[] args) {
@@ -120,13 +117,11 @@ class StartButton extends JButton implements MouseListener {
 
     private ImageIcon startImage;
     private game gameInstance;
-    
 
     public StartButton(game gameInstance) {
         // Load image from the resources
-        String path = "src/main/java/Project3/";
         startImage = new ImageIcon(getClass().getResource("startButton.png"));
-        
+
         // Resize the image to fit the button
         Image scaledImage = startImage.getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH);
         startImage = new ImageIcon(scaledImage);
@@ -139,24 +134,28 @@ class StartButton extends JButton implements MouseListener {
 
     }
 
-    public void mousePressed(MouseEvent e) {}
+    public void mousePressed(MouseEvent e) {
+    }
 
-    public void mouseReleased(MouseEvent e) {}
+    public void mouseReleased(MouseEvent e) {
+    }
 
-    public void mouseEntered(MouseEvent e) {}
+    public void mouseEntered(MouseEvent e) {
+    }
 
-    public void mouseExited(MouseEvent e) {}
+    public void mouseExited(MouseEvent e) {
+    }
 
     public void mouseClicked(MouseEvent e) {
         System.out.println("Game Started");
-        //start game
-        startGame(); 
+        // start game
+        startGame();
     }
 
-    public void startGame(){
+    public void startGame() {
         game gameInstance = new game();
         gameInstance.addKeyListener(new KeyInput(gameInstance));
-        
+
         JFrame gameFrame = new JFrame(game.TITLE);
         gameFrame.add(gameInstance);
         gameFrame.setPreferredSize(new Dimension(game.WIDTH, game.HEIGHT));
@@ -165,24 +164,20 @@ class StartButton extends JButton implements MouseListener {
         gameFrame.pack();
         gameFrame.setLocationRelativeTo(null);
         gameFrame.setVisible(true);
-        
 
         gameInstance.start();
-        //startmenu disappear
+        // startmenu disappear
         SwingUtilities.getWindowAncestor(this).setVisible(false);
     }
 }
 
 // class BufferedimageLoader{
-//     private BufferedImage image;
+// private BufferedImage image;
 
-//     public BufferedImage loadImage(String path) throws IOException{
-//         image = ImageIO.read(getClass().getResource(path));
-//         return image;
-
-//     }
+// public BufferedImage loadImage(String path) throws IOException{
+// image = ImageIO.read(getClass().getResource(path));
+// return image;
 
 // }
 
-    
-    
+// }
