@@ -17,13 +17,15 @@ import javax.swing.*;
 import java.util.List;
 
 
-class game extends Canvas implements Runnable // implements KeyListener
+
+
+class game extends JPanel implements Runnable // implements KeyListener
 {
 
     //if change dimensions do not forget to change other code that relies on it
-    public static final int WIDTH = 300;
-    public static final int HEIGHT = 450;
-    public static final int SCALE = 2;
+    public static final int WIDTH = 1366;
+    //game is at 766 instead of 768, im sorry.
+    public static final int HEIGHT = 766;
     public static String TITLE = "game";
 
     private boolean running = false;
@@ -45,13 +47,14 @@ class game extends Canvas implements Runnable // implements KeyListener
 
     public void init(){
         //focuses on window instantly, no need to click on window to register key
+        
         requestFocus();
         // try {
         //     player = ImageIO.read(getClass().getResource(MyConstants.FILE_SHIP));
         // } catch (IOException e) {
         //     e.printStackTrace();
         // }
-        p = new player((300 * 2) / 2, (450 * 2) - 32);
+        p = new player(WIDTH / 2, HEIGHT - 32);
     }
 
     synchronized public void start() {
@@ -111,7 +114,7 @@ class game extends Canvas implements Runnable // implements KeyListener
         game.addKeyListener(new KeyInput(game));
 
 
-        game.setPreferredSize(new Dimension(WIDTH * SCALE, HEIGHT * SCALE));
+        game.setPreferredSize(new Dimension(WIDTH, HEIGHT));
 
         JFrame frame = new JFrame(game.TITLE);
         frame.add(game);
@@ -153,7 +156,7 @@ class game extends Canvas implements Runnable // implements KeyListener
                 delta -= TIME_PER_TICK;
             }
             
-            render(); //render
+            repaint(); //render
         }
         System.out.println("Game Tick Counter: " + gameTickCounter);
         System.out.println("Bullet Counter: " + bulletCounter);
@@ -187,29 +190,51 @@ class game extends Canvas implements Runnable // implements KeyListener
         }
     }
 
-    private void render() {
-        BufferStrategy bs = this.getBufferStrategy();
-        if (bs == null) {
-            createBufferStrategy(3);
-            return;
-        }
+    // private void render() {
+    //     BufferStrategy bs = this.getBufferStrategy();
+    //     if (bs == null) {
+    //         createBufferStrategy(3);
+    //         return;
+    //     }
 
-        Graphics g = bs.getDrawGraphics();
-        ////////////////////////
+    //     Graphics g = bs.getDrawGraphics();
+    //     ////////////////////////
 
+    //     g.drawImage(image, 0, 0, getWidth(), getHeight(), this);
+
+    //     p.render(g);
+
+    //     for (Bullet bullet : bullets) {
+    //         bullet.render(g);
+    //     }
+
+    //     ///////////////////////
+    //     g.dispose();
+    //     bs.show();
+    // }
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+    
+        // Draw the background image
         g.drawImage(image, 0, 0, getWidth(), getHeight(), this);
-
-        p.render(g);
-
-        for (Bullet bullet : bullets) {
-            bullet.render(g);
+    
+        // Render the player
+        if (p != null) {
+            p.render(g);
         }
-
-
-        ///////////////////////
-        g.dispose();
-        bs.show();
+    
+        // Render bullets
+        for (Bullet bullet : bullets) {
+            if (bullet != null) {
+                bullet.render(g);
+            }
+        }
+    
+        // Toolkit.getDefaultToolkit().sync(); // Uncomment this if you notice any rendering issues
     }
+    
 
     private boolean rightPressed = false;
     private boolean leftPressed = false;
@@ -312,10 +337,10 @@ class player {
         y += velY;
 
         //collision bound with border
-        if (x <= 0) x = 0;
-        if (x >= (300 * 2) - 32) x = (300 * 2) - 32;
-        if (y <= 0) y = 0;
-        if (y >= (450 * 2) - 32) y = (450 * 2) - 32;
+        if (x <= 0 + 350) x = 0 + 350;
+        if (x >= (1366 - 350) - 32) x = (1366 - 350) - 32;
+        if (y <= 0 + 50) y = 0 + 50;
+        if (y >= 766 - 50 - 32) y = 766 - 50 - 32;
 
     }
 
