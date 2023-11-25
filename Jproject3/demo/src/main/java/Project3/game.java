@@ -8,6 +8,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import javax.imageio.ImageIO;
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
+import javax.sound.sampled.LineUnavailableException;
+import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.*;
 import java.util.List;
 
@@ -32,12 +37,11 @@ class game extends Canvas implements Runnable // implements KeyListener
     private List<Bullet> bullets = new ArrayList<>();
     private boolean shooting = false;
     private int bulletCounter = 0;
+    private int gameTickCounter = 0;
+
     private final int bulletThreshold = 5; // rate of the player's bullet
     private int totalBulletsShot = 0;
 
-
-    //player ship, temporary
-    //private BufferedImage player;
 
     public void init(){
         //focuses on window instantly, no need to click on window to register key
@@ -62,18 +66,46 @@ class game extends Canvas implements Runnable // implements KeyListener
     private synchronized void stop() {
         if (!running)
             return;
-
         running = false;
         try {
             thread.join();
         } catch (InterruptedException e) {
             e.printStackTrace();
-        }
-        ;
+        };
+
         System.exit(1);
     }
 
-    //main method is not important here since we are launching the game through main.java
+    public void setRunning(boolean running) {
+        this.running = running;
+        try {
+            if (!running && thread != null) {
+                thread.join();
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        System.exit(0);
+    }
+
+
+    private long lastSoundTime = 0;
+    private final long SOUND_COOLDOWN = 160; 
+    private synchronized void SFX(String soundFileName) {
+        long currentTime = System.currentTimeMillis();
+        if (currentTime - lastSoundTime > SOUND_COOLDOWN) {
+            lastSoundTime = currentTime;
+            try {
+            AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(getClass().getResource(soundFileName));
+            Clip clip = AudioSystem.getClip();
+            clip.open(audioInputStream);
+            clip.setMicrosecondPosition(0);
+            clip.start();
+        } catch (Exception e) {e.printStackTrace(); }
+        }
+    }
+
+    //main method is only for testing here since we are launching the game through main.java
     public static void main(String args[]) {
         game game = new game();
         game.addKeyListener(new KeyInput(game));
@@ -84,10 +116,17 @@ class game extends Canvas implements Runnable // implements KeyListener
         JFrame frame = new JFrame(game.TITLE);
         frame.add(game);
         frame.pack();
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         frame.setResizable(false);
-        // frame.setLocationRelativeTo(null);
+        frame.setLocationRelativeTo(null);
         frame.setVisible(true);
+
+        frame.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                game.setRunning(false);
+            }
+        });
         
 
         game.start();
@@ -95,6 +134,7 @@ class game extends Canvas implements Runnable // implements KeyListener
 
     @Override
     public void run() {
+        System.out.println("Run method started"); 
         init();
         final int TICKS_PER_SECOND = 60;
         final long TIME_PER_TICK = 1000000000 / TICKS_PER_SECOND;
@@ -102,7 +142,6 @@ class game extends Canvas implements Runnable // implements KeyListener
         long now;
         long delta = 0;
     
-
         //game loop
         while (running) {
             now = System.nanoTime();
@@ -116,18 +155,24 @@ class game extends Canvas implements Runnable // implements KeyListener
             
             render(); //render
         }
-    
+        System.out.println("Game Tick Counter: " + gameTickCounter);
+        System.out.println("Bullet Counter: " + bulletCounter);
+        System.out.println("Total Bullets Shot: " + totalBulletsShot);
+
         stop();
+        
     }
 
     private void tick() {
         p.tick();
+        gameTickCounter++;
 
         if (shooting) {
             // adjust the rate as needed
             if (bulletCounter % bulletThreshold == 0) {
                 bullets.add(new Bullet(p.getX() + 9, p.getY()));
                 totalBulletsShot++;
+                SFX(MyConstants.FILE_SHOOT);
             }
             bulletCounter++;
         }

@@ -2,16 +2,22 @@ package Project3;
 
 import java.awt.Image;
 import javax.swing.ImageIcon;
+import javax.sound.sampled.*; 
 public class resources {
     
 }
 
 interface MyConstants
 {
-    //----- Resource files
-    static final String PATH        = "/";
-    static final String FILE_SHIP     = PATH + "Ship_1.png";
-    static final String FILE_BULLET     = PATH + "whitebullet.png";
+    static final String RESOURCEPATH        = "/";
+
+    //----- image files
+    static final String FILE_SHIP     = RESOURCEPATH + "Ship_1.png";
+    static final String FILE_BULLET     = RESOURCEPATH + "whitebullet.png";
+
+    //----- audio files
+    static final String FILE_SHOOT     = RESOURCEPATH + "plst00.wav";
+
     
     //----- Sizes and locations
     static final int FRAMEWIDTH  = 1000;
@@ -19,3 +25,6 @@ interface MyConstants
     static final int GROUND_Y    = 350;
     static final int SKY_Y       = 50;
 }
+
+
+//for handling audio
