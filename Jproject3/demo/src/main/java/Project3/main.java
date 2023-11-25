@@ -13,19 +13,27 @@ class StartMenu extends JFrame {
     public StartMenu() {
         setTitle("Start Menu");
         setBounds(200, 200, 400, 400);
+        setPreferredSize(new Dimension(700, 700));
         setLocationRelativeTo(null);
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        contentPane = new JPanel();
-        setContentPane(contentPane);
-        contentPane.setLayout(null);
+
+        JPanel contentPane = (JPanel)getContentPane();
+        contentPane.setLayout( new BorderLayout(25, 25) );
 
         startButton = new StartButton(null);
-        contentPane.add(startButton);
+        contentPane.add(startButton, BorderLayout.CENTER);
 
-        setPreferredSize(new Dimension(700, 700));
+        JPanel cregion = new JPanel();
+        String[] difficulties = {"Very easy", "Easy", "Medium", "Hard", "Impossible"};
+        JComboBox<String> difficultyComboBox = new JComboBox<>(difficulties);
+	    cregion.add(difficultyComboBox);
+
+        StartMenu startMenu = this;
+        contentPane.add(cregion, BorderLayout.NORTH);
         
         pack();
         setVisible(true);
+        this.validate();
     }
 
     public static void main(String[] args) {
@@ -56,7 +64,6 @@ class StartButton extends JButton implements MouseListener {
 
         addMouseListener(this);
         this.gameInstance = gameInstance;
-
     }
 
     public void mousePressed(MouseEvent e) {}
