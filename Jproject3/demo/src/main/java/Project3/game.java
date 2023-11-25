@@ -50,11 +50,20 @@ class game extends JPanel implements Runnable // implements KeyListener
     private int totalBulletsShot = 0;
 
     //same thing for enemies
-    private List<enemy> enemies = new ArrayList<>();
+    private List<Enemy> enemies = new ArrayList<>();
     private int enemySpawnCounter = 0;
     private final int enemySpawnThreshold = 120; 
-    private void addEnemy(double x, double y) {
-        enemies.add(new enemy(x, y));
+    private void addEnemy(double x, double y, String enemyType) {
+        Enemy newEnemy;
+        switch (enemyType) {
+            case "shootingEnemy":
+                newEnemy = new shootingEnemy(x, y, bullets);
+                break;
+            default:
+                newEnemy = new DefaultEnemy(x, y);
+                break;
+        }
+        enemies.add(newEnemy);
     }
     
 
@@ -184,7 +193,7 @@ class game extends JPanel implements Runnable // implements KeyListener
         if (shooting) {
             // adjust the rate as needed
             if (bulletCounter % bulletThreshold == 0) {
-                bullets.add(new Bullet(p.getX() + 9, p.getY()));
+                bullets.add(new playerBullet(p.getX() + 9, p.getY()));
                 totalBulletsShot++;
                 SFX(MyConstants.FILE_SHOOT);
             }
@@ -201,20 +210,20 @@ class game extends JPanel implements Runnable // implements KeyListener
         }
 
         //handles on-screen enemies
-        for (enemy enemy : enemies) {
+        for (Enemy enemy : enemies) {
             enemy.tick();
         }
-
         enemySpawnCounter++;
         if (enemySpawnCounter >= enemySpawnThreshold) {
-            addEnemy(new Random().nextDouble() * (WIDTH - 50), 0); // Example: spawn at a random x position at the top
+            addEnemy(new Random().nextDouble() * (WIDTH - 50), 0, "DefaultEnemy"); // Example: spawn at a random x position at the top
+            addEnemy(new Random().nextDouble() * (WIDTH - 50), 0, "shootingEnemy");
             enemySpawnCounter = 0;
         }
 
         // Update and remove enemies
-        Iterator<enemy> iterator = enemies.iterator();
+        Iterator<Enemy> iterator = enemies.iterator();
         while (iterator.hasNext()) {
-            enemy enemy = iterator.next();
+            Enemy enemy = iterator.next();
             enemy.tick();
             if (enemy.isOffScreen()) {
                 iterator.remove();
@@ -223,7 +232,7 @@ class game extends JPanel implements Runnable // implements KeyListener
 
 
         //collision handling
-        for (enemy e : enemies) {
+        for (Enemy e : enemies) {
             if (p.getBounds().intersects(e.getBounds())) {
                 // Handle collision between player and enemy
                 System.out.println("player hit, GAME OVER");
@@ -246,7 +255,7 @@ class game extends JPanel implements Runnable // implements KeyListener
     
             // Reverse loop for enemies
             for (int j = enemies.size() - 1; j >= 0; j--) {
-                enemy e = enemies.get(j);
+                Enemy e = enemies.get(j);
     
                 if (b.getBounds().intersects(e.getBounds())) {
                     e.hit(); // Enemy has been hit
@@ -255,7 +264,7 @@ class game extends JPanel implements Runnable // implements KeyListener
                         enemies.remove(j); // Remove the enemy if it's destroyed
                     }
     
-                    bullets.remove(i); // Remove the bullet
+                    //bullets.remove(i); // Remove the bullet
                     System.out.println("enemy hit");
     
                     // Break out of the enemies loop since the bullet is removed
@@ -263,9 +272,6 @@ class game extends JPanel implements Runnable // implements KeyListener
                 }
             }
         }
-    
-
-
     }
 
 
@@ -296,7 +302,7 @@ class game extends JPanel implements Runnable // implements KeyListener
         }
 
         //render enemies
-        for (enemy enemy : enemies) {
+        for (Enemy enemy : enemies) {
             if (enemy != null) {
                 enemy.render(g);
             }
@@ -306,7 +312,6 @@ class game extends JPanel implements Runnable // implements KeyListener
         Toolkit.getDefaultToolkit().sync(); // Uncomment this if there are any rendering issues
     }
     
-
     private boolean rightPressed = false;
     private boolean leftPressed = false;
     private boolean upPressed = false;
@@ -404,7 +409,7 @@ class player {
     }
 
     public Rectangle getBounds() {
-        return new Rectangle((int)x, (int)y, player.getWidth(), player.getHeight());
+        return new Rectangle((int)x, (int)y, player.getWidth() - 10, player.getHeight() - 10);
     }
 
     public void tick(){
@@ -441,23 +446,58 @@ class player {
 }
 //////////////////////////////////// ENEMY CLASS ////////////////////////////////////
 
-class enemy{
-    private double x, y;
-    private double initialX;
-    private double speedY = 2; // Speed of enemy moving down
-    private double amplitude = 20; // Amplitude of the sine wave
-    private double frequency = 0.05; // Frequency of the sine wave
-    private BufferedImage enemyImage;
-    private final int hitThreshold = 5; 
-    private int hitCount = 0;
-    private boolean destroyed = false;
 
-    public enemy(double x, double y){
+abstract class Enemy {
+    protected double x, y;
+    protected BufferedImage enemyImage;
+    protected Rectangle bounds;
+    protected int hitCount = 1;
+    protected boolean destroyed = false;
+    protected List<Bullet> bulletList;
+
+
+    public Enemy(double x, double y) {
         this.x = x;
         this.y = y;
-        this.initialX = x;
+        // Common initialization
+    }
 
+    public abstract void tick(); // Each enemy type can have its own implementation
 
+    public void render(Graphics g) {
+        if (enemyImage != null) {
+            g.drawImage(enemyImage, (int)x, (int)y, null);
+        }
+    }
+
+    public Rectangle getBounds() {
+        return new Rectangle((int)x, (int)y, enemyImage.getWidth()-10, enemyImage.getHeight()-10);
+    }
+
+    public boolean isDestroyed() {
+        return destroyed;
+    }
+
+    public boolean isOffScreen() {
+        return y > game.HEIGHT;
+    }
+
+    public void hit() {
+        hitCount++;
+    }
+}
+
+class DefaultEnemy extends Enemy {
+    private double initialX;
+    private double speedY = 2; 
+    private double amplitude = 20;
+    private double frequency = 0.05;
+    private final int hitThreshold = 5; 
+
+    public DefaultEnemy(double x, double y) {
+        super(x, y);
+        initialX = x;
+        // Load specific image for this enemy type
         try {
             enemyImage = ImageIO.read(getClass().getResource(MyConstants.FILE_ALIEN1));
         } catch (IOException e) {
@@ -465,12 +505,8 @@ class enemy{
         }
     }
 
-    public Rectangle getBounds() {
-        return new Rectangle((int)x, (int)y, enemyImage.getWidth(), enemyImage.getHeight());
-    }
-
-    public void tick(){
-
+    @Override
+    public void tick() {
         //if we want crazy teleporting enemies (for Lunatic difficulty), just add X = 350 + new Random().nextInt(game.WIDTH - 700); to some conditions below
         //enemies do not get removed once off screen, instead they respawn at a random spot at the top or you could say "their friend replaced them"
         y += speedY;
@@ -484,45 +520,96 @@ class enemy{
         } 
     }
 
-    public void render(Graphics g){
-        if (enemyImage != null) {
-            g.drawImage(enemyImage, (int)x, (int)y, null);
-        }
-    }
-
-    //handles enemy getting hit, marking it to be destroyed
+    @Override
     public void hit() {
         hitCount++;
         if (hitCount >= hitThreshold) {
             destroyed = true;
         }
     }
+}
 
-    public boolean isDestroyed() {
-        return destroyed;
+class shootingEnemy extends Enemy{
+    private int shootCooldown = 60;
+    private int currentCooldown = 0;
+    private final int hitThreshold = 20; 
+
+    public shootingEnemy(double x, double y, List<Bullet> bulletList) {
+        super(x, y);
+        this.bulletList = bulletList;
+        try {
+            enemyImage = ImageIO.read(getClass().getResource(MyConstants.FILE_ALIEN2));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
-    public boolean isOffScreen() {
-        return y > game.HEIGHT;
+    @Override
+    public void tick() {
+        // Enemy movement logic, probably a linear function
+        y+=0.7;
+        if (currentCooldown <= 0) {
+            shoot();
+            currentCooldown = shootCooldown;
+        } else {
+            currentCooldown--;
+        }
+        if (x <= 0 + 350) x = 0 + 350;
+        if (x >= (1366 - 350) - 64) x = (1366 - 350) - 64;
+        if (y <= 0 + 50) y = 0 + 50;
+        if (y >= 766 - 50){
+            y = 0;
+            x = 350 + new Random().nextInt(game.WIDTH - 700);
+        }
+    }
+
+    private void shoot() {
+    int numberOfBullets = 5;
+    double bulletSpeed = 10; // Speed of bullets
+    double spreadAngle = Math.PI / 4; // Total angle of spread
+    double startAngle = -spreadAngle / 2;
+
+    System.out.println("Shooting Bullets:");
+    for (int i = 0; i < numberOfBullets; i++) {
+        double angle = startAngle + i * (spreadAngle / (numberOfBullets - 1));
+        double dx = Math.cos(angle);
+        double dy = Math.sin(angle);
+        Bullet newBullet = new enemyBullet(x, y, bulletSpeed, dx, dy);
+        bulletList.add(newBullet);
+
+        // Debugging print statements
+        System.out.println("Bullet " + (i + 1) + ": Angle = " + angle + ", dx = " + dx + ", dy = " + dy);
+    }
+}
+
+    @Override
+    public void hit() {
+        hitCount++;
+        if (hitCount >= hitThreshold) {
+            destroyed = true;
+        }
     }
 }
 
 //////////////////////////////////// BULLET CLASS ////////////////////////////////////
-class Bullet {
-    private double x;
-    private double y;
-    private double speed = 15.0;
-    private BufferedImage bullet;
+abstract class Bullet {
+    protected double x;
+    protected double y;
+    protected double dx; // X direction component
+    protected double dy; // Y direction component
+    protected double speed = 15.0;
+    protected BufferedImage bullet;
 
+    public Bullet(double x, double y, double speed, double dx, double dy) {
+        this.x = x;
+        this.y = y;
+        this.speed = speed;
+        this.dx = dx;
+        this.dy = dy;
+    }
     public Bullet(double x, double y) {
         this.x = x;
         this.y = y;
-
-        try {
-            bullet = ImageIO.read(getClass().getResource(MyConstants.FILE_BULLET));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     public Rectangle getBounds() {
@@ -541,6 +628,48 @@ class Bullet {
         return y < 0;
     }
 
+    protected void setBulletImage(String imagePath) {
+        try {
+            bullet = ImageIO.read(getClass().getResource(imagePath));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+}
+
+class playerBullet extends Bullet{
+
+    public playerBullet(double x, double y) {
+        super(x, y);
+        setBulletImage(MyConstants.FILE_BULLET); 
+        }
+}
+
+
+class enemyBullet extends Bullet{
+    double speed;
+    private BufferedImage bullet;
+
+    public enemyBullet(double x, double y, double speed, double dx, double dy) {
+        super(x, y, speed, dx, dy);
+
+        setBulletImage(MyConstants.FILE_ENEMYBULLET2); 
+    }
+
+    @Override
+    public void tick() {
+        x += dx * speed;
+        y += dy * speed;
+        System.out.println("Bullet moving to x: " + x + ", y: " + y);
+    }
+
+    @Override
+    public boolean isOffScreen() {
+        // Define off-screen logic for enemy bullets
+        return y > game.HEIGHT || y < 0 || x < 0 || x > game.WIDTH;
+    }
 }
 
 
