@@ -246,7 +246,7 @@ class game extends JPanel implements Runnable // implements KeyListener
             }
     
             for (Bullet b : bullets) {
-                if (b.getBounds().intersects(e.getBounds())) {
+                if (b.getBounds().intersects(e.getBounds()) && !b.isEnemyBullet) {
                     // Handle collision between bullet and enemy
                     // Remove the enemy and the bullet, or mark them for removal
                     System.out.println("enemy hit");
@@ -263,14 +263,16 @@ class game extends JPanel implements Runnable // implements KeyListener
                 Enemy e = enemies.get(j);
     
                 if (b.getBounds().intersects(e.getBounds())) {
-                    if(!b.isEnemyBullet)e.hit(); // Enemy has been hit
-    
+                    if(!b.isEnemyBullet){
+                        e.hit(); // Enemy has been hit
+                        bullets.remove(i); // Remove the bullet
+                    }
                     if (e.isDestroyed()) {
                         enemies.remove(j); // Remove the enemy if it's destroyed
                         if(e instanceof shootingEnemy) shootingEnemyActive = false;
                     }
     
-                    //bullets.remove(i); // Remove the bullet
+                    
                     System.out.println("enemy hit");
     
                     // Break out of the enemies loop since the bullet is removed
@@ -682,7 +684,7 @@ class enemyBullet extends Bullet{
 
     @Override
     public boolean isOffScreen() {
-        return y > game.HEIGHT || y < 0 || x < 0 || x > game.WIDTH;
+        return y > game.HEIGHT - 50 || y < 0 + 50 || x < 0 + 350 || x > game.WIDTH - 350;
     }
 }
 
