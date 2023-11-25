@@ -135,7 +135,7 @@ class StartButton extends JButton implements MouseListener {
         
         JFrame gameFrame = new JFrame(game.TITLE);
         gameFrame.add(gameInstance);
-        gameFrame.setPreferredSize(new Dimension(game.WIDTH * game.SCALE, game.HEIGHT * game.SCALE));
+        gameFrame.setPreferredSize(new Dimension(game.WIDTH, game.HEIGHT));
         gameFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         gameFrame.setResizable(false);
         gameFrame.pack();
