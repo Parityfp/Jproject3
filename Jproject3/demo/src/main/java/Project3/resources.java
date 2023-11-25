@@ -11,6 +11,7 @@ interface MyConstants
     //----- Resource files
     static final String PATH        = "/";
     static final String FILE_SHIP     = PATH + "Ship_1.png";
+    static final String FILE_BULLET     = PATH + "whitebullet.png";
     
     //----- Sizes and locations
     static final int FRAMEWIDTH  = 1000;
