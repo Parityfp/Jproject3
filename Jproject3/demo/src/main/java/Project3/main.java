@@ -12,7 +12,7 @@ class StartMenu extends JFrame {
 
     public StartMenu() {
         setTitle("Start Menu");
-        setBounds(200, 200, 700, 300);
+        setBounds(200, 200, 400, 400);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         contentPane = new JPanel();
@@ -22,7 +22,7 @@ class StartMenu extends JFrame {
         startButton = new StartButton(null);
         contentPane.add(startButton);
 
-        setPreferredSize(new Dimension(700, 300));
+        setPreferredSize(new Dimension(700, 700));
         
         pack();
         setVisible(true);
@@ -37,16 +37,19 @@ class StartMenu extends JFrame {
 
 class StartButton extends JButton implements MouseListener {
 
-    private int curX = 100, curY = 20;
-    private int width = 100, height = 100;
+    private int curX = 250, curY = 20;
+    private int width = 200, height = 150;
 
     private ImageIcon startImage;
     private game gameInstance;
 
     public StartButton(game gameInstance) {
-        // Load image from the resources
         String path = "src/main/java/Project3/";
         startImage = new ImageIcon(getClass().getResource("startButton.png"));
+
+        Image img = startImage.getImage();
+        Image resizedImg = img.getScaledInstance(width, height, Image.SCALE_SMOOTH);
+        startImage = new ImageIcon(resizedImg);
 
         setBounds(curX, curY, width, height);
         setIcon(startImage);
