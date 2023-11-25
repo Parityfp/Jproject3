@@ -5,9 +5,12 @@ import java.awt.event.*;
 import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.util.ArrayList;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
+import java.util.List;
+
 
 class game extends Canvas implements Runnable // implements KeyListener
 {
@@ -25,6 +28,12 @@ class game extends Canvas implements Runnable // implements KeyListener
 
     private player p;
 
+    //amount of bullets currently on screen
+    private List<Bullet> bullets = new ArrayList<>();
+    private boolean shooting = false;
+    private int bulletcounter;
+
+
     //player ship, temporary
     //private BufferedImage player;
 
@@ -36,7 +45,7 @@ class game extends Canvas implements Runnable // implements KeyListener
         // } catch (IOException e) {
         //     e.printStackTrace();
         // }
-        p = new player(200, 200);
+        p = new player((300 * 2) / 2, (450 * 2) - 32);
     }
 
     synchronized public void start() {
@@ -109,6 +118,20 @@ class game extends Canvas implements Runnable // implements KeyListener
 
     private void tick() {
         p.tick();
+
+        if (shooting) {
+            // adjust the rate as needed
+            bullets.add(new Bullet(p.getX() + 15, p.getY()));
+        }
+    
+        //handles on-screen bullets
+        for (int i = 0; i < bullets.size(); i++) {
+            bullets.get(i).tick();
+            if (bullets.get(i).isOffScreen()) {
+                bullets.remove(i);
+                i--;
+            }
+        }
     }
 
     private void render() {
@@ -124,6 +147,11 @@ class game extends Canvas implements Runnable // implements KeyListener
         g.drawImage(image, 0, 0, getWidth(), getHeight(), this);
 
         p.render(g);
+
+        for (Bullet bullet : bullets) {
+            bullet.render(g);
+        }
+
 
         ///////////////////////
         g.dispose();
@@ -152,6 +180,11 @@ class game extends Canvas implements Runnable // implements KeyListener
             p.setVelX(5);
             rightPressed = true;
         }
+        
+        if (key == KeyEvent.VK_SPACE) {
+            shooting = true;
+        }
+    
         updateVelocity();
 
     }
@@ -166,6 +199,10 @@ class game extends Canvas implements Runnable // implements KeyListener
             upPressed = false;
         }else if(key == KeyEvent.VK_S){
             downPressed = false;
+        }
+
+        if (key == KeyEvent.VK_SPACE) {
+            shooting = false;
         }
     
 
@@ -239,7 +276,51 @@ class player {
     public void setVelY(double velY){
         this.velY = velY;
     }
+
+    public double getX() {
+        return x;
+    }
+
+    public double getY() {
+        return y;
+    }
+
 }
+
+//////////////////////////////////// BULLET CLASS ////////////////////////////////////
+class Bullet {
+    private double x;
+    private double y;
+    private double speed = 10.0;
+    private BufferedImage bullet;
+
+    public Bullet(double x, double y) {
+        this.x = x;
+        this.y = y;
+
+        try {
+            bullet = ImageIO.read(getClass().getResource(MyConstants.FILE_BULLET));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    public void tick() {
+        y -= speed; // Move the bullet upwards
+    }
+
+    public void render(Graphics g) {
+        g.drawImage(bullet, (int)x, (int)y, null);
+    }
+
+
+
+    public boolean isOffScreen() {
+        return y < 0;
+    }
+
+
+}
+
 
 //////////////////////////////////// KEYINPUT CLASS ////////////////////////////////////
 
