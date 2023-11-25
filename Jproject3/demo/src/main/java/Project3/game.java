@@ -32,6 +32,8 @@ class game extends JPanel implements Runnable // implements KeyListener
     private Thread thread;
 
     private BufferedImage image = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
+    private ImageIcon bg;
+
 
     private player p;
 
@@ -47,14 +49,10 @@ class game extends JPanel implements Runnable // implements KeyListener
 
     public void init(){
         //focuses on window instantly, no need to click on window to register key
-        
+
         requestFocus();
-        // try {
-        //     player = ImageIO.read(getClass().getResource(MyConstants.FILE_SHIP));
-        // } catch (IOException e) {
-        //     e.printStackTrace();
-        // }
         p = new player(WIDTH / 2, HEIGHT - 32);
+        bg = new ImageIcon(getClass().getResource(MyConstants.FILE_BG));
     }
 
     synchronized public void start() {
@@ -190,28 +188,6 @@ class game extends JPanel implements Runnable // implements KeyListener
         }
     }
 
-    // private void render() {
-    //     BufferStrategy bs = this.getBufferStrategy();
-    //     if (bs == null) {
-    //         createBufferStrategy(3);
-    //         return;
-    //     }
-
-    //     Graphics g = bs.getDrawGraphics();
-    //     ////////////////////////
-
-    //     g.drawImage(image, 0, 0, getWidth(), getHeight(), this);
-
-    //     p.render(g);
-
-    //     for (Bullet bullet : bullets) {
-    //         bullet.render(g);
-    //     }
-
-    //     ///////////////////////
-    //     g.dispose();
-    //     bs.show();
-    // }
 
     @Override
     protected void paintComponent(Graphics g) {
@@ -219,6 +195,13 @@ class game extends JPanel implements Runnable // implements KeyListener
     
         // Draw the background image
         g.drawImage(image, 0, 0, getWidth(), getHeight(), this);
+
+        int startX = (WIDTH - 666) / 2;
+        int startY = (HEIGHT - 666) / 2;
+
+        // Draw the GIF
+        g.drawImage(bg.getImage(), startX, startY, 666, 666, this);
+
     
         // Render the player
         if (p != null) {
