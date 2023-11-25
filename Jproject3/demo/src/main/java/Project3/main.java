@@ -1,11 +1,14 @@
 package Project3;
 
+import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.Image;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.util.concurrent.Flow;
 
 import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
@@ -16,6 +19,7 @@ import javax.swing.JRadioButton;
 import javax.swing.JToggleButton;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
+import javax.swing.JComboBox;
 
 class StartMenu extends JFrame {
 
@@ -37,7 +41,12 @@ class StartMenu extends JFrame {
         startButton = new StartButton(null);
         contentPane.add(startButton);
 
-         // Create mute and unmute toggle buttons
+        //Combo box for diffculties
+        String[] difficulties = {"Very easy", "Easy", "Medium", "Hard", "Impossible"};
+        JComboBox<String> difficultyComboBox = new JComboBox<>(difficulties);
+	    contentPane.add(difficultyComboBox);
+        
+        // Create mute and unmute toggle buttons
         tb = new JToggleButton[2];
         tb[0] = new JRadioButton("Mute");
         tb[0].setName("Mute");
@@ -80,6 +89,7 @@ class StartMenu extends JFrame {
         
         pack();
         setVisible(true);
+        this.validate();
     }
 
     public static void main(String[] args) {
@@ -147,8 +157,6 @@ class StartButton extends JButton implements MouseListener {
         //startmenu disappear
         SwingUtilities.getWindowAncestor(this).setVisible(false);
     }
-
-    
 }
 
 // class BufferedimageLoader{
