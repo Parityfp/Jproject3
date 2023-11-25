@@ -28,7 +28,7 @@ class StartMenu extends JFrame {
         setContentPane(drawpane);
 
         startButton = new StartButton(null);
-        contentPane.add(startButton);
+        drawpane.add(startButton);
 
          // Create mute and unmute toggle buttons
         tb = new JToggleButton[2];
@@ -43,8 +43,11 @@ class StartMenu extends JFrame {
         // Set positions and add buttons to the content pane
         tb[0].setBounds(40, 100, 100, 30);
         tb[1].setBounds(140, 100, 100, 30);
-        contentPane.add(tb[0]);
-        contentPane.add(tb[1]);
+        drawpane.add(tb[0]);
+        drawpane.add(tb[1]);
+
+        pack();
+        setVisible(true);
 
         tb[0].addItemListener(new ItemListener() {//Mute button
             @Override
@@ -69,7 +72,7 @@ class StartMenu extends JFrame {
         pack();
         setVisible(true);
     }
-
+    ///////Add BG////////////////////
     private void AddComponents() {
         final String FILE_BG = "C:/Users/Admin/OneDrive/Desktop/MUIC/Paradigms/Jproject3/Jproject3/demo/src/main/java/Project3/spaceBG.png";//file path
 
@@ -85,6 +88,7 @@ class StartMenu extends JFrame {
             new StartMenu();
         });
     }
+    
 }
 
 class StartButton extends JButton implements MouseListener {
