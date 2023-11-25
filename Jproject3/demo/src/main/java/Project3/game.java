@@ -53,6 +53,7 @@ class game extends JPanel implements Runnable // implements KeyListener
     private List<Enemy> enemies = new ArrayList<>();
     private int enemySpawnCounter = 0;
     private final int enemySpawnThreshold = 120; 
+    private boolean shootingEnemyActive = false;
     private void addEnemy(double x, double y, String enemyType) {
         Enemy newEnemy;
         switch (enemyType) {
@@ -216,7 +217,11 @@ class game extends JPanel implements Runnable // implements KeyListener
         enemySpawnCounter++;
         if (enemySpawnCounter >= enemySpawnThreshold) {
             addEnemy(new Random().nextDouble() * (WIDTH - 50), 0, "DefaultEnemy"); // Example: spawn at a random x position at the top
-            addEnemy(new Random().nextDouble() * (WIDTH - 50), 0, "shootingEnemy");
+            if (!shootingEnemyActive) {
+                addEnemy(new Random().nextDouble() * (WIDTH - 50), 0, "shootingEnemy");
+                shootingEnemyActive = true;
+            }
+    
             enemySpawnCounter = 0;
         }
 
@@ -258,10 +263,11 @@ class game extends JPanel implements Runnable // implements KeyListener
                 Enemy e = enemies.get(j);
     
                 if (b.getBounds().intersects(e.getBounds())) {
-                    e.hit(); // Enemy has been hit
+                    if(!b.isEnemyBullet)e.hit(); // Enemy has been hit
     
                     if (e.isDestroyed()) {
                         enemies.remove(j); // Remove the enemy if it's destroyed
+                        if(e instanceof shootingEnemy) shootingEnemyActive = false;
                     }
     
                     //bullets.remove(i); // Remove the bullet
@@ -530,9 +536,10 @@ class DefaultEnemy extends Enemy {
 }
 
 class shootingEnemy extends Enemy{
-    private int shootCooldown = 60;
+    private int shootCooldown = 100;
     private int currentCooldown = 0;
-    private final int hitThreshold = 20; 
+    private final int hitThreshold = 35; 
+    private double velX = 1.5;
 
     public shootingEnemy(double x, double y, List<Bullet> bulletList) {
         super(x, y);
@@ -547,15 +554,22 @@ class shootingEnemy extends Enemy{
     @Override
     public void tick() {
         // Enemy movement logic, probably a linear function
-        y+=0.7;
+        y+=1;
+        x+=velX;
         if (currentCooldown <= 0) {
             shoot();
             currentCooldown = shootCooldown;
         } else {
             currentCooldown--;
         }
-        if (x <= 0 + 350) x = 0 + 350;
-        if (x >= (1366 - 350) - 64) x = (1366 - 350) - 64;
+        if (x <= 0 + 350) {
+            x = 0 + 350;
+            velX = -velX;
+        }
+        if (x >= (1366 - 350) - 64) {
+            x = (1366 - 350) - 64;
+            velX = -velX;
+        }
         if (y <= 0 + 50) y = 0 + 50;
         if (y >= 766 - 50){
             y = 0;
@@ -564,10 +578,11 @@ class shootingEnemy extends Enemy{
     }
 
     private void shoot() {
-    int numberOfBullets = 5;
-    double bulletSpeed = 10; // Speed of bullets
-    double spreadAngle = Math.PI / 4; // Total angle of spread
-    double startAngle = -spreadAngle / 2;
+    int numberOfBullets = 20;
+    double bulletSpeed = 5; // Speed of bullets
+    double spreadAngle = Math.PI * 2; // Total angle of spread
+    //direction
+    double startAngle = Math.PI / 2 - spreadAngle / 2; 
 
     System.out.println("Shooting Bullets:");
     for (int i = 0; i < numberOfBullets; i++) {
@@ -599,13 +614,15 @@ abstract class Bullet {
     protected double dy; // Y direction component
     protected double speed = 15.0;
     protected BufferedImage bullet;
+    protected boolean isEnemyBullet;
 
-    public Bullet(double x, double y, double speed, double dx, double dy) {
+    public Bullet(double x, double y, double speed, double dx, double dy, boolean isEnemyBullet) {
         this.x = x;
         this.y = y;
         this.speed = speed;
         this.dx = dx;
         this.dy = dy;
+        this.isEnemyBullet = isEnemyBullet;
     }
     public Bullet(double x, double y) {
         this.x = x;
@@ -649,12 +666,10 @@ class playerBullet extends Bullet{
 
 
 class enemyBullet extends Bullet{
-    double speed;
     private BufferedImage bullet;
 
     public enemyBullet(double x, double y, double speed, double dx, double dy) {
-        super(x, y, speed, dx, dy);
-
+        super(x, y, speed, dx, dy, true);
         setBulletImage(MyConstants.FILE_ENEMYBULLET2); 
     }
 
@@ -667,7 +682,6 @@ class enemyBullet extends Bullet{
 
     @Override
     public boolean isOffScreen() {
-        // Define off-screen logic for enemy bullets
         return y > game.HEIGHT || y < 0 || x < 0 || x > game.WIDTH;
     }
 }
