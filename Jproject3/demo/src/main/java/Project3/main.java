@@ -1,31 +1,20 @@
 package Project3;
 
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.Image;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.util.concurrent.Flow;
-
-import javax.swing.ButtonGroup;
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.JRadioButton;
-import javax.swing.JToggleButton;
-import javax.swing.SwingUtilities;
-import javax.swing.WindowConstants;
-import javax.swing.JComboBox;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
 
 class StartMenu extends JFrame {
 
     private JPanel contentPane;
     private StartButton startButton;
     private JToggleButton []tb;
+    private JPanel contentpane;
+    private JLabel drawpane;
+    private ImageIcon backgroundImg;
+    private JTextField usernameField;
+    private JPasswordField passwordField;
+
 
     public StartMenu() {
         setTitle("Start Menu");
@@ -42,9 +31,25 @@ class StartMenu extends JFrame {
         contentPane.add(startButton);
 
         //Combo box for diffculties
-        String[] difficulties = {"Very easy", "Easy", "Medium", "Hard", "Impossible"};
+        String[] difficulties = {"Very easy", "Easy", "Medium", "Hard", "Lunatic"};
         JComboBox<String> difficultyComboBox = new JComboBox<>(difficulties);
-	    contentPane.add(difficultyComboBox);
+	    difficultyComboBox.setBounds(250,20,150,30);
+        contentPane.add(difficultyComboBox);
+
+        //Username and Password
+        JPanel authPanel = new JPanel(new GridLayout(3, 2));
+
+        authPanel.add(new JLabel("Username:"));
+        usernameField = new JTextField();
+        authPanel.add(usernameField);
+
+        authPanel.add(new JLabel("Password:"));
+        passwordField = new JPasswordField();
+        authPanel.add(passwordField);
+
+        authPanel.setBounds(50, 150, 300, 100);
+        contentPane.add(authPanel);
+        
         
         // Create mute and unmute toggle buttons
         tb = new JToggleButton[2];
@@ -86,10 +91,19 @@ class StartMenu extends JFrame {
 
         setPreferredSize(new Dimension(700, 300));
 
-        
+        AddComponents();
+
         pack();
         setVisible(true);
-        this.validate();
+    }
+
+    private void AddComponents() {
+        final String FILE_BG = "src/main/Java/Project3/spaceBG.png";
+
+        backgroundImg = new ImageIcon(FILE_BG);
+        drawpane = new JLabel();
+        drawpane.setIcon(backgroundImg);
+        drawpane.setLayout(null);
     }
 
     public static void main(String[] args) {
