@@ -87,7 +87,7 @@ class game extends JPanel implements Runnable // implements KeyListener
             e.printStackTrace();
         };
 
-        System.exit(1);
+        System.exit(0);
     }
 
     public void setRunning(boolean running) {
@@ -130,7 +130,7 @@ class game extends JPanel implements Runnable // implements KeyListener
         JFrame frame = new JFrame(game.TITLE);
         frame.add(game);
         frame.pack();
-        frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setResizable(false);
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
@@ -221,7 +221,51 @@ class game extends JPanel implements Runnable // implements KeyListener
             }
         }
 
+
+        //collision handling
+        for (enemy e : enemies) {
+            if (p.getBounds().intersects(e.getBounds())) {
+                // Handle collision between player and enemy
+                System.out.println("player hit, GAME OVER");
+                running = false;
+                return;
+            }
     
+            for (Bullet b : bullets) {
+                if (b.getBounds().intersects(e.getBounds())) {
+                    // Handle collision between bullet and enemy
+                    // Remove the enemy and the bullet, or mark them for removal
+                    System.out.println("enemy hit");
+                    SFX(MyConstants.FILE_HIT);
+                }
+            }
+        } 
+
+        for (int i = bullets.size() - 1; i >= 0; i--) {
+            Bullet b = bullets.get(i);
+    
+            // Reverse loop for enemies
+            for (int j = enemies.size() - 1; j >= 0; j--) {
+                enemy e = enemies.get(j);
+    
+                if (b.getBounds().intersects(e.getBounds())) {
+                    e.hit(); // Enemy has been hit
+    
+                    if (e.isDestroyed()) {
+                        enemies.remove(j); // Remove the enemy if it's destroyed
+                    }
+    
+                    bullets.remove(i); // Remove the bullet
+                    System.out.println("enemy hit");
+    
+                    // Break out of the enemies loop since the bullet is removed
+                    break;
+                }
+            }
+        }
+    
+
+
     }
 
 
@@ -359,6 +403,10 @@ class player {
         }
     }
 
+    public Rectangle getBounds() {
+        return new Rectangle((int)x, (int)y, player.getWidth(), player.getHeight());
+    }
+
     public void tick(){
         x += velX;
         y += velY;
@@ -400,8 +448,9 @@ class enemy{
     private double amplitude = 20; // Amplitude of the sine wave
     private double frequency = 0.05; // Frequency of the sine wave
     private BufferedImage enemyImage;
-
-    
+    private final int hitThreshold = 5; 
+    private int hitCount = 0;
+    private boolean destroyed = false;
 
     public enemy(double x, double y){
         this.x = x;
@@ -416,19 +465,41 @@ class enemy{
         }
     }
 
+    public Rectangle getBounds() {
+        return new Rectangle((int)x, (int)y, enemyImage.getWidth(), enemyImage.getHeight());
+    }
+
     public void tick(){
-         y += speedY;
+
+        //if we want crazy teleporting enemies (for Lunatic difficulty), just add X = 350 + new Random().nextInt(game.WIDTH - 700); to some conditions below
+        //enemies do not get removed once off screen, instead they respawn at a random spot at the top or you could say "their friend replaced them"
+        y += speedY;
         x = initialX + amplitude * Math.sin(frequency * y);
         if (x <= 0 + 350) x = 0 + 350;
         if (x >= (1366 - 350) - 64) x = (1366 - 350) - 64;
         if (y <= 0 + 50) y = 0 + 50;
-        if (y >= 766 - 50 - 64) y = 766 - 50 - 64;
+        if (y >= 766 - 50){
+            y = 0;
+            initialX = 350 + new Random().nextInt(game.WIDTH - 700);
+        } 
     }
 
     public void render(Graphics g){
         if (enemyImage != null) {
             g.drawImage(enemyImage, (int)x, (int)y, null);
         }
+    }
+
+    //handles enemy getting hit, marking it to be destroyed
+    public void hit() {
+        hitCount++;
+        if (hitCount >= hitThreshold) {
+            destroyed = true;
+        }
+    }
+
+    public boolean isDestroyed() {
+        return destroyed;
     }
 
     public boolean isOffScreen() {
@@ -453,6 +524,11 @@ class Bullet {
             e.printStackTrace();
         }
     }
+
+    public Rectangle getBounds() {
+        return new Rectangle((int)x, (int)y, bullet.getWidth(), bullet.getHeight());
+    }
+
     public void tick() {
         y -= speed; // Move the bullet upwards
     }

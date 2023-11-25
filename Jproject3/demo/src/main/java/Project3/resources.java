@@ -19,6 +19,7 @@ interface MyConstants
 
     //----- audio files
     static final String FILE_SHOOT     = RESOURCEPATH + "plst00.wav";
+    static final String FILE_HIT     = RESOURCEPATH + "graze.wav";
 
     
     //----- Sizes and locations
