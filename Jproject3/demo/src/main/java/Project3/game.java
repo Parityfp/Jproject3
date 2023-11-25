@@ -31,7 +31,9 @@ class game extends Canvas implements Runnable // implements KeyListener
     //amount of bullets currently on screen
     private List<Bullet> bullets = new ArrayList<>();
     private boolean shooting = false;
-    private int bulletcounter;
+    private int bulletCounter = 0;
+    private final int bulletThreshold = 5; // rate of the player's bullet
+    private int totalBulletsShot = 0;
 
 
     //player ship, temporary
@@ -100,6 +102,8 @@ class game extends Canvas implements Runnable // implements KeyListener
         long now;
         long delta = 0;
     
+
+        //game loop
         while (running) {
             now = System.nanoTime();
             delta += (now - lastTime);
@@ -121,7 +125,11 @@ class game extends Canvas implements Runnable // implements KeyListener
 
         if (shooting) {
             // adjust the rate as needed
-            bullets.add(new Bullet(p.getX() + 15, p.getY()));
+            if (bulletCounter % bulletThreshold == 0) {
+                bullets.add(new Bullet(p.getX() + 9, p.getY()));
+                totalBulletsShot++;
+            }
+            bulletCounter++;
         }
     
         //handles on-screen bullets
@@ -291,7 +299,7 @@ class player {
 class Bullet {
     private double x;
     private double y;
-    private double speed = 10.0;
+    private double speed = 15.0;
     private BufferedImage bullet;
 
     public Bullet(double x, double y) {
@@ -312,12 +320,9 @@ class Bullet {
         g.drawImage(bullet, (int)x, (int)y, null);
     }
 
-
-
     public boolean isOffScreen() {
         return y < 0;
     }
-
 
 }
 
