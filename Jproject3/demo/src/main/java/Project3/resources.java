@@ -15,6 +15,7 @@ interface MyConstants
     static final String FILE_SHIP     = RESOURCEPATH + "Ship_1.png";
     static final String FILE_BULLET     = RESOURCEPATH + "whitebullet.png";
     static final String FILE_BG     = RESOURCEPATH + "touhou15.gif";
+    static final String FILE_ALIEN1     = RESOURCEPATH + "tf.png";
 
     //----- audio files
     static final String FILE_SHOOT     = RESOURCEPATH + "plst00.wav";

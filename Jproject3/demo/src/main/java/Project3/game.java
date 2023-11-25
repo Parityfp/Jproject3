@@ -15,6 +15,9 @@ import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.*;
 import java.util.List;
+import java.util.Random;
+import java.util.Iterator;
+
 
 
 
@@ -46,6 +49,14 @@ class game extends JPanel implements Runnable // implements KeyListener
     private final int bulletThreshold = 5; // rate of the player's bullet
     private int totalBulletsShot = 0;
 
+    //same thing for enemies
+    private List<enemy> enemies = new ArrayList<>();
+    private int enemySpawnCounter = 0;
+    private final int enemySpawnThreshold = 120; 
+    private void addEnemy(double x, double y) {
+        enemies.add(new enemy(x, y));
+    }
+    
 
     public void init(){
         //focuses on window instantly, no need to click on window to register key
@@ -53,6 +64,8 @@ class game extends JPanel implements Runnable // implements KeyListener
         requestFocus();
         p = new player(WIDTH / 2, HEIGHT - 32);
         bg = new ImageIcon(getClass().getResource(MyConstants.FILE_BG));
+        enemies = new ArrayList<>();
+        
     }
 
     synchronized public void start() {
@@ -186,6 +199,29 @@ class game extends JPanel implements Runnable // implements KeyListener
                 i--;
             }
         }
+
+        //handles on-screen enemies
+        for (enemy enemy : enemies) {
+            enemy.tick();
+        }
+
+        enemySpawnCounter++;
+        if (enemySpawnCounter >= enemySpawnThreshold) {
+            addEnemy(new Random().nextDouble() * (WIDTH - 50), 0); // Example: spawn at a random x position at the top
+            enemySpawnCounter = 0;
+        }
+
+        // Update and remove enemies
+        Iterator<enemy> iterator = enemies.iterator();
+        while (iterator.hasNext()) {
+            enemy enemy = iterator.next();
+            enemy.tick();
+            if (enemy.isOffScreen()) {
+                iterator.remove();
+            }
+        }
+
+    
     }
 
 
@@ -214,8 +250,16 @@ class game extends JPanel implements Runnable // implements KeyListener
                 bullet.render(g);
             }
         }
+
+        //render enemies
+        for (enemy enemy : enemies) {
+            if (enemy != null) {
+                enemy.render(g);
+            }
+        }
     
-        // Toolkit.getDefaultToolkit().sync(); // Uncomment this if you notice any rendering issues
+    
+        Toolkit.getDefaultToolkit().sync(); // Uncomment this if there are any rendering issues
     }
     
 
@@ -346,6 +390,50 @@ class player {
         return y;
     }
 
+}
+//////////////////////////////////// ENEMY CLASS ////////////////////////////////////
+
+class enemy{
+    private double x, y;
+    private double initialX;
+    private double speedY = 2; // Speed of enemy moving down
+    private double amplitude = 20; // Amplitude of the sine wave
+    private double frequency = 0.05; // Frequency of the sine wave
+    private BufferedImage enemyImage;
+
+    
+
+    public enemy(double x, double y){
+        this.x = x;
+        this.y = y;
+        this.initialX = x;
+
+
+        try {
+            enemyImage = ImageIO.read(getClass().getResource(MyConstants.FILE_ALIEN1));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void tick(){
+         y += speedY;
+        x = initialX + amplitude * Math.sin(frequency * y);
+        if (x <= 0 + 350) x = 0 + 350;
+        if (x >= (1366 - 350) - 64) x = (1366 - 350) - 64;
+        if (y <= 0 + 50) y = 0 + 50;
+        if (y >= 766 - 50 - 64) y = 766 - 50 - 64;
+    }
+
+    public void render(Graphics g){
+        if (enemyImage != null) {
+            g.drawImage(enemyImage, (int)x, (int)y, null);
+        }
+    }
+
+    public boolean isOffScreen() {
+        return y > game.HEIGHT;
+    }
 }
 
 //////////////////////////////////// BULLET CLASS ////////////////////////////////////
