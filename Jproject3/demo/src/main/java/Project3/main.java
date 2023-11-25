@@ -1,21 +1,8 @@
 package Project3;
 
-import java.awt.Dimension;
-import java.awt.Image;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-
-import javax.swing.ButtonGroup;
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.JRadioButton;
-import javax.swing.JToggleButton;
-import javax.swing.SwingUtilities;
-import javax.swing.WindowConstants;
+import java.awt.*;
+import java.awt.event.*;
+import javax.swing.*;
 
 class StartMenu extends JFrame {
 
