@@ -13,7 +13,8 @@ class StartMenu extends JFrame {
     private ImageIcon backgroundImg;
     private JTextField usernameField;
     private JPasswordField passwordField;
-     private JButton creditsButton;
+    private JButton creditsButton;
+    private static String selectedDifficulty = "Normal"; 
 
     public StartMenu() {
         setTitle("Start Menu");
@@ -30,10 +31,19 @@ class StartMenu extends JFrame {
         contentPane.add(startButton);
 
         // Combo box for diffculties
-        String[] difficulties = { "Very easy", "Easy", "Medium", "Hard", "Lunatic" };
+        String[] difficulties = { "Baby", "Easy", "Normal", "Hard", "Lunatic" };
         JComboBox<String> difficultyComboBox = new JComboBox<>(difficulties);
         difficultyComboBox.setBounds(250, 20, 150, 30);
         contentPane.add(difficultyComboBox);
+        difficultyComboBox.setSelectedItem("Normal");
+        difficultyComboBox.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                selectedDifficulty = (String) difficultyComboBox.getSelectedItem();
+                System.out.println(selectedDifficulty);
+            }
+        });
+
 
         // Username and Password
         JPanel authPanel = new JPanel(new GridLayout(3, 2));
@@ -146,6 +156,10 @@ class StartMenu extends JFrame {
         creditsFrame.setVisible(true);
     }
 
+    public static String getDifficulty(){
+        return selectedDifficulty;
+    }
+
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
             new StartMenu();
@@ -201,7 +215,7 @@ class StartButton extends JButton implements MouseListener {
     }
 
     public void startGame() {
-        game gameInstance = new game();
+        game gameInstance = new game(StartMenu.getDifficulty());
         gameInstance.addKeyListener(new KeyInput(gameInstance));
 
         JFrame gameFrame = new JFrame(game.TITLE);

@@ -19,10 +19,6 @@ import java.util.List;
 import java.util.Random;
 import java.util.Iterator;
 
-
-
-
-
 class game extends JPanel implements Runnable // implements KeyListener
 {
 
@@ -31,6 +27,8 @@ class game extends JPanel implements Runnable // implements KeyListener
     //game is at 766 instead of 768, im sorry.
     public static final int HEIGHT = 768;
     public static String TITLE = "game";
+    private String difficulty;
+
 
     private boolean running = false;
     private boolean isPaused = false;
@@ -70,9 +68,10 @@ class game extends JPanel implements Runnable // implements KeyListener
 
     //same thing for enemies
     private List<Enemy> enemies = new ArrayList<>();
+    private List<shootingEnemy> shootingEnemies;
     private int enemySpawnCounter = 0;
     //this should be the main difficulty parameter
-    private final int enemySpawnThreshold = 30; 
+    private int enemySpawnThreshold = 30; 
     private boolean shootingEnemyActive = false;
     private int shootingEnemyTimer = 0;
     private final int shootingEnemyCooldown = 5 * 60; 
@@ -81,6 +80,36 @@ class game extends JPanel implements Runnable // implements KeyListener
         switch (enemyType) {
             case "shootingEnemy":
                 newEnemy = new shootingEnemy(x, y, bullets);
+                switch (this.difficulty) {
+                    case "Baby":
+                        ((shootingEnemy) newEnemy).setshootCooldown(200);
+                        ((shootingEnemy) newEnemy).sethitThreshold(5);
+                        ((shootingEnemy) newEnemy).setNumberOfBullets(10);
+                        break;
+                    case "Easy":
+                        ((shootingEnemy) newEnemy).setshootCooldown(300);
+                        ((shootingEnemy) newEnemy).sethitThreshold(10);
+                        ((shootingEnemy) newEnemy).setNumberOfBullets(15);
+                        break;
+                    case "Normal":
+                        ((shootingEnemy) newEnemy).setshootCooldown(150);
+                        ((shootingEnemy) newEnemy).sethitThreshold(15);
+                        ((shootingEnemy) newEnemy).setNumberOfBullets(15);
+                        break;
+                    case "hard":
+                        ((shootingEnemy) newEnemy).setshootCooldown(150);
+                        ((shootingEnemy) newEnemy).sethitThreshold(25);
+                        ((shootingEnemy) newEnemy).setNumberOfBullets(20);
+                        break;
+                    case "Lunatic":
+                        ((shootingEnemy) newEnemy).setshootCooldown(150);
+                        ((shootingEnemy) newEnemy).sethitThreshold(35);
+                        break;
+                    default:
+                        ((shootingEnemy) newEnemy).setshootCooldown(300);
+                        ((shootingEnemy) newEnemy).sethitThreshold(5);
+                        break;
+                }
                 break;
             default:
                 newEnemy = new DefaultEnemy(x, y);
@@ -88,11 +117,35 @@ class game extends JPanel implements Runnable // implements KeyListener
         }
         enemies.add(newEnemy);
     }
+
+    private void initDifficulty(){
+        switch (this.difficulty) {
+            case "Baby":
+                enemySpawnThreshold = 300;
+                break;
+            case "Easy":
+                enemySpawnThreshold = 150;
+                break;
+            case "Normal":
+                enemySpawnThreshold = 60;
+                break;
+            case "hard":
+                enemySpawnThreshold = 45;
+                break;
+            case "Lunatic":
+                enemySpawnThreshold = 30;
+                break;
+            default:
+                enemySpawnThreshold = 50;
+                break;
+        }
+    }
     
     //bomb stuff
     private void activateBomb() {
         // Play bomb sound and gif
         SFX(MyConstants.FILE_BOMB, false);
+        //copy item generation technique from other method
         for (Enemy e : enemies) {
             int enemyType = 0;
             if (e instanceof shootingEnemy) {
@@ -106,6 +159,7 @@ class game extends JPanel implements Runnable // implements KeyListener
             }
             if (e instanceof DefaultEnemy)items.add(new point(this, e.getX(), e.getY(), enemyType));
         }
+        bullets.clear();
         enemies.clear();
         enemySpawnCounter = 0;
         shootingEnemyTimer = 0;
@@ -121,7 +175,7 @@ class game extends JPanel implements Runnable // implements KeyListener
     public void init(){
         //focuses on window instantly, no need to click on window to register key
         requestFocus();
-
+        initDifficulty();
         //should make a method for this
         pointsLabel = new JLabel("");
         pointsLabel.setForeground(Color.WHITE); 
@@ -158,6 +212,7 @@ class game extends JPanel implements Runnable // implements KeyListener
         p = new player(WIDTH / 2, HEIGHT - 32);
         bg = new ImageIcon(getClass().getResource(MyConstants.FILE_BG));
         enemies = new ArrayList<>();
+        
         
     }
 
@@ -227,7 +282,7 @@ class game extends JPanel implements Runnable // implements KeyListener
 
     //main method is only for testing here since we are launching the game through main.java
     public static void main(String args[]) {
-        game game = new game();
+        game game = new game("Baby");
         game.addKeyListener(new KeyInput(game));
 
 
@@ -247,10 +302,12 @@ class game extends JPanel implements Runnable // implements KeyListener
                 game.setRunning(false);
             }
         });
-        
-
         game.start();
     }
+    public game(String difficulty) {
+        this.difficulty = difficulty;
+    }
+
 
     @Override
     public void run() {
@@ -279,6 +336,7 @@ class game extends JPanel implements Runnable // implements KeyListener
         System.out.println("Bullet Counter: " + bulletCounter);
         System.out.println("Total Bullets Shot: " + totalBulletsShot);
         System.out.println("Points: " + p.getPoints());
+        System.out.println("Difficulty: " + this.difficulty);
 
         stop();
         
@@ -374,6 +432,11 @@ class game extends JPanel implements Runnable // implements KeyListener
                     // Remove the enemy and the bullet, or mark them for removal
                     //System.out.println("enemy hit");
                     SFX(MyConstants.FILE_HIT, false);
+                }
+                if (b.isEnemyBullet && p.getBounds().intersects(b.getBounds())) {
+                    System.out.println("player hit by enemy bullet, GAME OVER");
+                    running = false;
+                    return;
                 }
             }
         } 
@@ -644,7 +707,6 @@ class player {
 }
 //////////////////////////////////// ENEMY CLASS ////////////////////////////////////
 
-
 abstract class Enemy {
     protected double x, y;
     protected BufferedImage enemyImage;
@@ -652,7 +714,6 @@ abstract class Enemy {
     protected int hitCount = 1;
     protected boolean destroyed = false;
     protected List<Bullet> bulletList;
-
 
     public Enemy(double x, double y) {
         this.x = x;
@@ -698,7 +759,7 @@ class DefaultEnemy extends Enemy {
     private double speedY = 1; 
     private double amplitude = 20;
     private double frequency = 0.02;
-    private final int hitThreshold = 2; 
+    private int hitThreshold = 5; 
 
     public DefaultEnemy(double x, double y) {
         super(x, y);
@@ -736,10 +797,16 @@ class DefaultEnemy extends Enemy {
 }
 
 class shootingEnemy extends Enemy{
-    private int shootCooldown = 150;
+    private int shootCooldown = 15;
     private int currentCooldown = 0;
-    private final int hitThreshold = 35; 
+    private int hitThreshold = 35; 
     private double velX = 1.5;
+
+    private int numberOfBullets = 15;
+    private double bulletSpeed = 4;
+    private double spreadAngle = Math.PI * 2;
+    private double startAngle = Math.PI / 2 - spreadAngle / 2;
+
 
     public shootingEnemy(double x, double y, List<Bullet> bulletList) {
         super(x, y);
@@ -751,6 +818,10 @@ class shootingEnemy extends Enemy{
         }
     }
 
+    public void setshootCooldown(int shootCooldown) {this.shootCooldown = shootCooldown;}
+    public void sethitThreshold(int hitThreshold) {this.hitThreshold = hitThreshold;}
+    public void setNumberOfBullets(int numberOfBullets) {this.numberOfBullets = numberOfBullets;}
+    public void setBulletSpeed(double bulletSpeed) {this.bulletSpeed = bulletSpeed;}
     @Override
     public void tick() {
         // Enemy movement logic, probably a linear function
@@ -778,11 +849,6 @@ class shootingEnemy extends Enemy{
     }
 
     private void shoot() {
-    int numberOfBullets = 15;
-    double bulletSpeed = 4; // Speed of bullets
-    double spreadAngle = Math.PI * 2; // Total angle of spread
-    //direction
-    double startAngle = Math.PI / 2 - spreadAngle / 2; 
 
     System.out.println("Shooting Bullets:");
     for (int i = 0; i < numberOfBullets; i++) {
