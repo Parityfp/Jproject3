@@ -425,7 +425,6 @@ class game extends JPanel implements Runnable // implements KeyListener
                 items.remove(i);
                 i--;
             }
-            // Optionally, remove the item if it goes off-screen
         }
 
         if (!bombAvailable) {
@@ -517,7 +516,7 @@ class game extends JPanel implements Runnable // implements KeyListener
                         pointsLabel.setText("" + p.getPoints());
                         break;
                 }
-                if (it.getEnemyType() == 3) { // Assuming 2 is the type for stars
+                if (it.getEnemyType() == 3) { //enemy type 3 is NOT an enemy, but an indicator that the item is not from an enemy.
                     p.addUpgrades();
                 }
                 items.remove(i);
