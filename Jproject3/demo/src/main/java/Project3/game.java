@@ -33,12 +33,13 @@ class game extends JPanel implements Runnable // implements KeyListener
     public static String TITLE = "game";
 
     private boolean running = false;
+    private boolean isPaused = false;
     private Thread thread;
 
     private BufferedImage image = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
     private ImageIcon bg;
 
-    private JLabel pointsLabel, bombsLabel;
+    private JLabel pointsLabel, bombsLabel, pauseLabel;
 
     private player p;
     public double getPlayerX() {
@@ -132,10 +133,27 @@ class game extends JPanel implements Runnable // implements KeyListener
         bombsLabel.setForeground(Color.WHITE); 
         bombsLabel.setFont(new Font("Monospaced", Font.BOLD, 22));
         bombsLabel.setBounds(WIDTH - 340, 85, 350, 30);
+
+        //pause
+        pauseLabel = new JLabel("Time Paused, ESC to resume") {
+            @Override
+            protected void paintComponent(Graphics g) {
+                g.setColor(new Color(255, 255, 255, 100)); // White with alpha
+                g.fillRect(0, 0, getWidth(), getHeight());
+                super.paintComponent(g);
+            }
+        };
+        pauseLabel.setOpaque(false);
+        pauseLabel.setForeground(Color.WHITE);
+        pauseLabel.setFont(new Font("Monospaced", Font.BOLD, 22));
+        pauseLabel.setBounds(350, 50, 666, 666);
+        pauseLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        pauseLabel.setVisible(false);
         
         this.setLayout(null); // null layout for absolute positioning
         this.add(pointsLabel);
         this.add(bombsLabel);
+        this.add(pauseLabel);
 
         p = new player(WIDTH / 2, HEIGHT - 32);
         bg = new ImageIcon(getClass().getResource(MyConstants.FILE_BG));
@@ -267,6 +285,7 @@ class game extends JPanel implements Runnable // implements KeyListener
     }
 
     private void tick() {
+        if(isPaused)return;
         p.tick();
         gameTickCounter++;
 
@@ -496,6 +515,11 @@ class game extends JPanel implements Runnable // implements KeyListener
         
         if (key == KeyEvent.VK_SPACE) {
             shooting = true;
+        }
+
+        if (key == KeyEvent.VK_ESCAPE) {
+            isPaused = !isPaused;
+            pauseLabel.setVisible(isPaused);
         }
 
         if (key == KeyEvent.VK_B) {
