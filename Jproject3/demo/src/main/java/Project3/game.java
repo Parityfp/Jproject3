@@ -285,9 +285,13 @@ class game extends JPanel implements Runnable // implements KeyListener
                         bullets.remove(i); // Remove the bullet
                     }
                     if (e.isDestroyed()) {
-                        items.add(new point(e.getX(), e.getY()));
+                        int enemyType = 0;
+                        if(e instanceof shootingEnemy){
+                            shootingEnemyActive = false;
+                            enemyType = 1;
+                        } 
+                        items.add(new point(e.getX(), e.getY(), enemyType));
                         enemies.remove(j); // Remove the enemy if it's destroyed
-                        if(e instanceof shootingEnemy) shootingEnemyActive = false;
                     }
     
                     
@@ -305,7 +309,19 @@ class game extends JPanel implements Runnable // implements KeyListener
             it.tick();
             if (p.getBounds().intersects(it.getBounds())) {
                 // Increase player's points, can add if or case statement for how much to increase depending on the enmemy type
-                p.addPoints(1000);
+                switch (it.getEnemyType()) {
+                    case 0:
+                        p.addPoints(1000);
+                        break;
+                    case 1:
+                        p.addPoints(10000);
+                        break;
+                    // Add more cases as needed for different enemy types
+                    default:
+                        p.addPoints(100); // Default points
+                        break;
+                }
+        
                 items.remove(i);
                 i--;
             }
@@ -529,6 +545,7 @@ abstract class Enemy {
     public double getY() {
         return y;
     }
+    
 
     public boolean isDestroyed() {
         return destroyed;
@@ -735,11 +752,14 @@ class enemyBullet extends Bullet{
 
 abstract class item{
     protected BufferedImage item;
+    protected int enemyType;
     protected double x;
     protected double y;
-    public item(double x, double y) {
+    public item(double x, double y, int enemyType) {
         this.x = x;
         this.y = y;
+        this.enemyType = enemyType;
+
     }
 
     public void tick() {
@@ -760,7 +780,9 @@ abstract class item{
     public Rectangle getBounds() {
         return new Rectangle((int)x, (int)y, item.getWidth(), item.getHeight());
     }
-
+    public int getEnemyType(){
+        return enemyType;
+    }
 
     public boolean isOffScreen() {
         return y > game.HEIGHT - 50 || y < 0 + 50 || x < 0 + 350 || x > game.WIDTH - 350;
@@ -769,8 +791,8 @@ abstract class item{
 
 class point extends item{
 
-    public point(double x, double y) {
-        super(x, y);
+    public point(double x, double y, int enemyType) {
+        super(x, y, enemyType);
         setItemImage(MyConstants.FILE_POINT); 
     }
     @Override
