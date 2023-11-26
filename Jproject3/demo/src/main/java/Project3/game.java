@@ -57,8 +57,11 @@ class game extends JPanel implements Runnable // implements KeyListener
     //same thing for enemies
     private List<Enemy> enemies = new ArrayList<>();
     private int enemySpawnCounter = 0;
-    private final int enemySpawnThreshold = 120; 
+    //this should be the main difficulty parameter
+    private final int enemySpawnThreshold = 30; 
     private boolean shootingEnemyActive = false;
+    private int shootingEnemyTimer = 0;
+    private final int shootingEnemyCooldown = 5 * 60; 
     private void addEnemy(double x, double y, String enemyType) {
         Enemy newEnemy;
         switch (enemyType) {
@@ -230,11 +233,16 @@ class game extends JPanel implements Runnable // implements KeyListener
             enemy.tick();
         }
         enemySpawnCounter++;
+        if (!shootingEnemyActive) {
+            shootingEnemyTimer++;
+        }
+        
         if (enemySpawnCounter >= enemySpawnThreshold) {
             addEnemy(new Random().nextDouble() * (WIDTH - 50), 0, "DefaultEnemy"); // Example: spawn at a random x position at the top
-            if (!shootingEnemyActive) {
+            if (!shootingEnemyActive && shootingEnemyTimer >= shootingEnemyCooldown) {
                 addEnemy(new Random().nextDouble() * (WIDTH - 50), 0, "shootingEnemy");
                 shootingEnemyActive = true;
+                shootingEnemyTimer = 0;
             }
     
             enemySpawnCounter = 0;
@@ -276,7 +284,7 @@ class game extends JPanel implements Runnable // implements KeyListener
                 if (b.getBounds().intersects(e.getBounds()) && !b.isEnemyBullet) {
                     // Handle collision between bullet and enemy
                     // Remove the enemy and the bullet, or mark them for removal
-                    System.out.println("enemy hit");
+                    //System.out.println("enemy hit");
                     SFX(MyConstants.FILE_HIT);
                 }
             }
@@ -299,13 +307,22 @@ class game extends JPanel implements Runnable // implements KeyListener
                         if(e instanceof shootingEnemy){
                             shootingEnemyActive = false;
                             enemyType = 1;
+                            int numItems = 5; // Number of items in the cluster
+                            for (int k = 0; k < numItems; k++) {
+                                double offsetX = (Math.random() - 0.5) * 20; // between -10 and 10
+                                double offsetY = (Math.random() - 0.5) * 20;
+
+                                // Spawn a new item with the offset
+                                items.add(new point(e.getX() + offsetX, e.getY() + offsetY, enemyType));
+                            } 
                         } 
-                        items.add(new point(e.getX(), e.getY(), enemyType));
+                        
+
+                        if(e instanceof DefaultEnemy)items.add(new point(e.getX(), e.getY(), enemyType));
                         enemies.remove(j); // Remove the enemy if it's destroyed
                     }
     
-                    
-                    System.out.println("enemy hit");
+                    //System.out.println("enemy hit");
     
                     // Break out of the enemies loop since the bullet is removed
                     break;
@@ -323,6 +340,7 @@ class game extends JPanel implements Runnable // implements KeyListener
                     case 0:
                         p.addPoints(1000);
                         pointsLabel.setText("" + p.getPoints());
+                        System.out.println(it.getEnemyType());
                         break;
                     case 1:
                         p.addPoints(10000);
@@ -574,10 +592,10 @@ abstract class Enemy {
 
 class DefaultEnemy extends Enemy {
     private double initialX;
-    private double speedY = 2; 
+    private double speedY = 1; 
     private double amplitude = 20;
-    private double frequency = 0.05;
-    private final int hitThreshold = 5; 
+    private double frequency = 0.02;
+    private final int hitThreshold = 2; 
 
     public DefaultEnemy(double x, double y) {
         super(x, y);
@@ -671,8 +689,7 @@ class shootingEnemy extends Enemy{
         Bullet newBullet = new enemyBullet(x, y, bulletSpeed, dx, dy);
         bulletList.add(newBullet);
 
-        // Debugging print statements
-        System.out.println("Bullet " + (i + 1) + ": Angle = " + angle + ", dx = " + dx + ", dy = " + dy);
+        //System.out.println("Bullet " + (i + 1) + ": Angle = " + angle + ", dx = " + dx + ", dy = " + dy);
     }
 }
 
@@ -751,7 +768,7 @@ class enemyBullet extends Bullet{
     public void tick() {
         x += dx * speed;
         y += dy * speed;
-        System.out.println("Bullet moving to x: " + x + ", y: " + y);
+        //System.out.println("Bullet moving to x: " + x + ", y: " + y);
     }
 
     @Override
@@ -767,11 +784,12 @@ abstract class item{
     protected int enemyType;
     protected double x;
     protected double y;
+    protected double velX;
+    protected double velY;
     public item(double x, double y, int enemyType) {
         this.x = x;
         this.y = y;
         this.enemyType = enemyType;
-
     }
 
     public void tick() {
@@ -806,15 +824,18 @@ class point extends item{
     public point(double x, double y, int enemyType) {
         super(x, y, enemyType);
         setItemImage(MyConstants.FILE_POINT); 
+        this.velX = (Math.random() - 0.5) * 2;
+        this.velY = (Math.random() + 0.25) * 2; //between 0.5 and 2.5
     }
     @Override
     public void tick(){
-        y++;
+        x += velX;
+        y += velY;
+
+        velX *= 0.95;
     }
     
 }
-
-    
 
 //////////////////////////////////// KEYINPUT CLASS ////////////////////////////////////
 
