@@ -104,6 +104,7 @@ class game extends JPanel implements Runnable // implements KeyListener
                     case "Lunatic":
                         ((shootingEnemy) newEnemy).setshootCooldown(150);
                         ((shootingEnemy) newEnemy).sethitThreshold(35);
+                        ((shootingEnemy) newEnemy).setvelX(3);
                         break;
                     default:
                         ((shootingEnemy) newEnemy).setshootCooldown(300);
@@ -822,6 +823,7 @@ class shootingEnemy extends Enemy{
     public void sethitThreshold(int hitThreshold) {this.hitThreshold = hitThreshold;}
     public void setNumberOfBullets(int numberOfBullets) {this.numberOfBullets = numberOfBullets;}
     public void setBulletSpeed(double bulletSpeed) {this.bulletSpeed = bulletSpeed;}
+    public void setvelX(double velX) {this.velX = velX;}
     @Override
     public void tick() {
         // Enemy movement logic, probably a linear function
@@ -893,7 +895,7 @@ abstract class Bullet {
     }
 
     public Rectangle getBounds() {
-        return new Rectangle((int)x, (int)y, bullet.getWidth(), bullet.getHeight());
+        return new Rectangle((int)x, (int)y, bullet.getWidth()-5, bullet.getHeight()-5);
     }
 
     public void tick() {
