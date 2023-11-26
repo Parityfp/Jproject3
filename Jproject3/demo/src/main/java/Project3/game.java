@@ -28,7 +28,7 @@ class game extends JPanel implements Runnable // implements KeyListener
     //if change dimensions do not forget to change other code that relies on it
     public static final int WIDTH = 1366;
     //game is at 766 instead of 768, im sorry.
-    public static final int HEIGHT = 768;
+    public static final int HEIGHT = 766;
     public static String TITLE = "game";
 
     private boolean running = false;
@@ -37,6 +37,7 @@ class game extends JPanel implements Runnable // implements KeyListener
     private BufferedImage image = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
     private ImageIcon bg;
 
+    private JLabel pointsLabel;
 
     private player p;
 
@@ -74,8 +75,17 @@ class game extends JPanel implements Runnable // implements KeyListener
 
     public void init(){
         //focuses on window instantly, no need to click on window to register key
-
         requestFocus();
+
+        //should make a method for this
+        pointsLabel = new JLabel("");
+        pointsLabel.setForeground(Color.WHITE); 
+        pointsLabel.setFont(new Font("Monospaced", Font.BOLD, 22));
+        pointsLabel.setBounds(WIDTH - 340, 45, 180, 30);
+        
+        this.setLayout(null); // null layout for absolute positioning
+        this.add(pointsLabel);
+
         p = new player(WIDTH / 2, HEIGHT - 32);
         bg = new ImageIcon(getClass().getResource(MyConstants.FILE_BG));
         enemies = new ArrayList<>();
@@ -312,13 +322,15 @@ class game extends JPanel implements Runnable // implements KeyListener
                 switch (it.getEnemyType()) {
                     case 0:
                         p.addPoints(1000);
+                        pointsLabel.setText("" + p.getPoints());
                         break;
                     case 1:
                         p.addPoints(10000);
+                        pointsLabel.setText("" + p.getPoints());
                         break;
-                    // Add more cases as needed for different enemy types
                     default:
-                        p.addPoints(100); // Default points
+                        p.addPoints(100);
+                        pointsLabel.setText("" + p.getPoints());
                         break;
                 }
         
