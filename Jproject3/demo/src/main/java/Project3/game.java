@@ -29,7 +29,7 @@ class game extends JPanel implements Runnable // implements KeyListener
     //if change dimensions do not forget to change other code that relies on it
     public static final int WIDTH = 1366;
     //game is at 766 instead of 768, im sorry.
-    public static final int HEIGHT = 766;
+    public static final int HEIGHT = 768;
     public static String TITLE = "game";
 
     private boolean running = false;
