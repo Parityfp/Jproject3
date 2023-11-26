@@ -54,11 +54,10 @@ class StartMenu extends JFrame {
         creditsButton.setBounds(570, 220, 100, 30);
         contentPane.add(creditsButton);
 
-        // Add action listener to Credits button
         creditsButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                showCredits();  // Call the method to display credits
+                showCredits();
             }
         });
 
@@ -123,11 +122,24 @@ class StartMenu extends JFrame {
         creditsFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         creditsFrame.setLayout(new GridLayout(3, 1));
 
-        JLabel nameLabel1 = new JLabel("Member 1:");
-        JLabel nameLabel2 = new JLabel("Member 2:");
+        int fontSize = 18;
+
+        JLabel nameLabel1 = new JLabel(" Frank Piyawat Davies 6480255 ");
+        Font customFont1 = new Font("Times New Roman", Font.BOLD, fontSize); 
+        nameLabel1.setFont(customFont1);
+
+        JLabel nameLabel2 = new JLabel(" Jitsopin Kanthaulis 6480376 ");
+        Font customFont2 = new Font("Times New Roman", Font.BOLD, fontSize); 
+        nameLabel2.setFont(customFont2);
+
+        JLabel nameLabel3 = new JLabel(" Chanakan Boonchoo 6580128 ");
+        Font customFont3 = new Font("Times New Roman", Font.BOLD, fontSize); 
+        nameLabel3.setFont(customFont3);
 
         creditsFrame.add(nameLabel1);
         creditsFrame.add(nameLabel2);
+        creditsFrame.add(nameLabel3);
+
 
         creditsFrame.pack();
         creditsFrame.setLocationRelativeTo(null);
