@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.Iterator;
 
+//TODO arraylist for sounds
 class game extends JPanel implements Runnable // implements KeyListener
 {
 
@@ -66,7 +67,7 @@ class game extends JPanel implements Runnable // implements KeyListener
     private final int bombTimerThreshold = 10 * 60;
     private boolean bombAvailable = false;
     private int starThreshold = 5000; // Initial score required for the first star
-    private int starThresholdIncrement = 40000;
+    private int starThresholdIncrement = 80000;
 
     //same thing for enemies
     private List<Enemy> enemies = new ArrayList<>();
@@ -425,7 +426,7 @@ class game extends JPanel implements Runnable // implements KeyListener
         if (p.getPoints() >= starThreshold) {
             items.add(new star(this, new Random().nextInt(game.WIDTH - 350), 100, 3));
             starThreshold += starThresholdIncrement;
-            starThresholdIncrement *= 2; // comment for non - exponential growth
+            starThresholdIncrement *= 3; // comment for non - exponential growth
         }
     
 
@@ -441,6 +442,9 @@ class game extends JPanel implements Runnable // implements KeyListener
 
         if (!bombAvailable) {
             bombTimer++;
+            if (bombTimer >= bombTimerThreshold - 1) {
+                SFX(MyConstants.FILE_READY, false);
+            }
             if (bombTimer >= bombTimerThreshold) {
                 bombAvailable = true;
                 bombTimer = 0;

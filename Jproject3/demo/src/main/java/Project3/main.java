@@ -119,12 +119,14 @@ class StartMenu extends JFrame {
 
     private void AddBackground() {
         backgroundImg = new ImageIcon(getClass().getResource("spaceBG.png"));
-        drawpane = new JLabel();
-        drawpane.setIcon(backgroundImg);
+        ImageIcon gifBackground = new ImageIcon(getClass().getResource(MyConstants.FILE_BG3));
+        drawpane = new JLabel(gifBackground);
+        //drawpane.setIcon(backgroundImg);
         drawpane.setLayout(null);
 
         drawpane.setBounds(0, 0, getWidth(), getHeight());
         contentPane.add(drawpane);
+        contentPane.setComponentZOrder(drawpane, Integer.MAX_VALUE); // Ensure the background is always at the back
     }
 
     private void showCredits() {

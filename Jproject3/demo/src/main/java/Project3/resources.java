@@ -16,6 +16,7 @@ interface MyConstants
     static final String FILE_BULLET     = RESOURCEPATH + "whitebullet.png";
     static final String FILE_BG     = RESOURCEPATH + "touhou15.gif";
     static final String FILE_BG2     = RESOURCEPATH + "space.jpeg";
+    static final String FILE_BG3     = RESOURCEPATH + "backGround1.gif";
     static final String FILE_ALIEN1     = RESOURCEPATH + "tf.png";
     static final String FILE_ALIEN2     = RESOURCEPATH + "whitewoman.png";
     static final String FILE_ENEMYBULLET1     = RESOURCEPATH + "enemybullet.png";
@@ -32,6 +33,7 @@ interface MyConstants
     static final String FILE_SHOOT     = RESOURCEPATH + "plst00.wav";
     static final String FILE_HIT     = RESOURCEPATH + "graze.wav";
     static final String FILE_BOMB     = RESOURCEPATH + "lazer01.wav";
+    static final String FILE_READY     = RESOURCEPATH + "ok00.wav";
 
     //----- IMPORTANT
     static final String NON_SUSPICIOUS_LINK     = RESOURCEPATH + "https://www.youtube.com/watch?v=dQw4w9WgXcQ";
