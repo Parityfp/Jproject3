@@ -13,6 +13,7 @@ class StartMenu extends JFrame {
     private ImageIcon backgroundImg;
     private JTextField usernameField;
     private JPasswordField passwordField;
+     private JButton creditsButton;
 
     public StartMenu() {
         setTitle("Start Menu");
@@ -47,6 +48,19 @@ class StartMenu extends JFrame {
 
         authPanel.setBounds(50, 150, 300, 100);
         contentPane.add(authPanel);
+
+        //Credits button
+        creditsButton = new JButton("Credits");
+        creditsButton.setBounds(570, 220, 100, 30);
+        contentPane.add(creditsButton);
+
+        // Add action listener to Credits button
+        creditsButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                showCredits();  // Call the method to display credits
+            }
+        });
 
         // Create mute and unmute toggle buttons
         tb = new JToggleButton[2];
@@ -103,6 +117,23 @@ class StartMenu extends JFrame {
         contentPane.add(drawpane);
     }
 
+    private void showCredits() {
+        JFrame creditsFrame = new JFrame("Credits");
+        creditsFrame.setBounds(300, 300, 400, 200);
+        creditsFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        creditsFrame.setLayout(new GridLayout(3, 1));
+
+        JLabel nameLabel1 = new JLabel("Member 1:");
+        JLabel nameLabel2 = new JLabel("Member 2:");
+
+        creditsFrame.add(nameLabel1);
+        creditsFrame.add(nameLabel2);
+
+        creditsFrame.pack();
+        creditsFrame.setLocationRelativeTo(null);
+        creditsFrame.setVisible(true);
+    }
+
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
             new StartMenu();
@@ -112,8 +143,8 @@ class StartMenu extends JFrame {
 
 class StartButton extends JButton implements MouseListener {
 
-    private int curX = 50, curY = 20;
-    private int width = 150, height = 60;
+    private int curX = 50, curY = 0;
+    private int width = 150, height = 100;
 
     private ImageIcon startImage;
     private game gameInstance;
@@ -125,6 +156,11 @@ class StartButton extends JButton implements MouseListener {
         // Resize the image to fit the button
         Image scaledImage = startImage.getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH);
         startImage = new ImageIcon(scaledImage);
+
+        setBorderPainted(false);
+        setContentAreaFilled(false);
+        setFocusPainted(false);
+        setOpaque(false);
 
         setBounds(curX, curY, width, height);
         setIcon(startImage);
