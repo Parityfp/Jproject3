@@ -11,6 +11,7 @@ import javax.imageio.ImageIO;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
+import javax.sound.sampled.LineEvent;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.*;
@@ -37,9 +38,17 @@ class game extends JPanel implements Runnable // implements KeyListener
     private BufferedImage image = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
     private ImageIcon bg;
 
-    private JLabel pointsLabel;
+    private JLabel pointsLabel, bombsLabel;
 
     private player p;
+    public double getPlayerX() {
+        return p.getX();
+    }
+
+    public double getPlayerY() {
+        return p.getY();
+    }
+
 
     //amount of bullets currently on screen
     private List<Bullet> bullets = new ArrayList<>();
@@ -47,12 +56,16 @@ class game extends JPanel implements Runnable // implements KeyListener
     private int bulletCounter = 0;
     private int gameTickCounter = 0;
 
+    private Clip shootingClip;
+
     private final int bulletThreshold = 5; // rate of the player's bullet
     private int totalBulletsShot = 0;
 
     //same thing for items
     private List<item> items = new ArrayList<>();
-
+    private int bombTimer = 0;
+    private final int bombTimerThreshold = 10 * 60;
+    private boolean bombAvailable = false;
 
     //same thing for enemies
     private List<Enemy> enemies = new ArrayList<>();
@@ -75,6 +88,34 @@ class game extends JPanel implements Runnable // implements KeyListener
         enemies.add(newEnemy);
     }
     
+    //bomb stuff
+    private void activateBomb() {
+        // Play bomb sound and gif
+        SFX(MyConstants.FILE_BOMB, false);
+        for (Enemy e : enemies) {
+            int enemyType = 0;
+            if (e instanceof shootingEnemy) {
+                enemyType = 1;
+                int numItems = 5; // Number of items in the item cluster
+                    for (int k = 0; k < numItems; k++) {
+                        double offsetX = (Math.random() - 0.5) * 20; // between -10 and 10
+                        double offsetY = (Math.random() - 0.5) * 20;
+                        items.add(new point(this, e.getX() + offsetX, e.getY() + offsetY, enemyType));
+                    } 
+            }
+            if (e instanceof DefaultEnemy)items.add(new point(this, e.getX(), e.getY(), enemyType));
+        }
+        enemies.clear();
+        enemySpawnCounter = 0;
+        shootingEnemyTimer = 0;
+        shootingEnemyActive = false;
+        
+        for (item it : items) {
+            it.attractToPlayer();
+        }
+        // More bomb stuff
+    }
+    
 
     public void init(){
         //focuses on window instantly, no need to click on window to register key
@@ -84,10 +125,17 @@ class game extends JPanel implements Runnable // implements KeyListener
         pointsLabel = new JLabel("");
         pointsLabel.setForeground(Color.WHITE); 
         pointsLabel.setFont(new Font("Monospaced", Font.BOLD, 22));
-        pointsLabel.setBounds(WIDTH - 340, 45, 180, 30);
+        pointsLabel.setBounds(WIDTH - 340, 45, 350, 30);
+
+        //bomb
+        bombsLabel = new JLabel("Bomb:");
+        bombsLabel.setForeground(Color.WHITE); 
+        bombsLabel.setFont(new Font("Monospaced", Font.BOLD, 22));
+        bombsLabel.setBounds(WIDTH - 340, 85, 350, 30);
         
         this.setLayout(null); // null layout for absolute positioning
         this.add(pointsLabel);
+        this.add(bombsLabel);
 
         p = new player(WIDTH / 2, HEIGHT - 32);
         bg = new ImageIcon(getClass().getResource(MyConstants.FILE_BG));
@@ -132,16 +180,29 @@ class game extends JPanel implements Runnable // implements KeyListener
 
     private long lastSoundTime = 0;
     private final long SOUND_COOLDOWN = 160; 
-    private synchronized void SFX(String soundFileName) {
+    private boolean isClipPlaying = false;
+    private synchronized void SFX(String soundFileName, boolean loop) {
         long currentTime = System.currentTimeMillis();
-        if (currentTime - lastSoundTime > SOUND_COOLDOWN) {
+        if (currentTime - lastSoundTime > SOUND_COOLDOWN && !isClipPlaying) {
             lastSoundTime = currentTime;
             try {
             AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(getClass().getResource(soundFileName));
             Clip clip = AudioSystem.getClip();
             clip.open(audioInputStream);
             clip.setMicrosecondPosition(0);
-            clip.start();
+            if (loop) {
+                isClipPlaying = true;
+                clip.loop(Clip.LOOP_CONTINUOUSLY);
+                clip.addLineListener(event -> {
+                    if (event.getType() == LineEvent.Type.STOP) {
+                        isClipPlaying = false;
+                    }
+                });
+
+            } else {
+                clip.start();
+            }
+
         } catch (Exception e) {e.printStackTrace(); }
         }
     }
@@ -214,7 +275,8 @@ class game extends JPanel implements Runnable // implements KeyListener
             if (bulletCounter % bulletThreshold == 0) {
                 bullets.add(new playerBullet(p.getX() + 9, p.getY()));
                 totalBulletsShot++;
-                SFX(MyConstants.FILE_SHOOT);
+                //TODO make sound loop WORK
+                SFX(MyConstants.FILE_SHOOT, false);
             }
             bulletCounter++;
         }
@@ -268,7 +330,14 @@ class game extends JPanel implements Runnable // implements KeyListener
             }
             // Optionally, remove the item if it goes off-screen
         }
-    
+
+        if (!bombAvailable) {
+            bombTimer++;
+            if (bombTimer >= bombTimerThreshold) {
+                bombAvailable = true;
+                bombTimer = 0;
+            }
+        }
 
 
         //collision handling
@@ -285,18 +354,16 @@ class game extends JPanel implements Runnable // implements KeyListener
                     // Handle collision between bullet and enemy
                     // Remove the enemy and the bullet, or mark them for removal
                     //System.out.println("enemy hit");
-                    SFX(MyConstants.FILE_HIT);
+                    SFX(MyConstants.FILE_HIT, false);
                 }
             }
         } 
 
         for (int i = bullets.size() - 1; i >= 0; i--) {
             Bullet b = bullets.get(i);
-    
             // Reverse loop for enemies
             for (int j = enemies.size() - 1; j >= 0; j--) {
                 Enemy e = enemies.get(j);
-    
                 if (b.getBounds().intersects(e.getBounds())) {
                     if(!b.isEnemyBullet){
                         e.hit(); // Enemy has been hit
@@ -311,14 +378,11 @@ class game extends JPanel implements Runnable // implements KeyListener
                             for (int k = 0; k < numItems; k++) {
                                 double offsetX = (Math.random() - 0.5) * 20; // between -10 and 10
                                 double offsetY = (Math.random() - 0.5) * 20;
-
                                 // Spawn a new item with the offset
-                                items.add(new point(e.getX() + offsetX, e.getY() + offsetY, enemyType));
+                                items.add(new point(this, e.getX() + offsetX, e.getY() + offsetY, enemyType));
                             } 
                         } 
-                        
-
-                        if(e instanceof DefaultEnemy)items.add(new point(e.getX(), e.getY(), enemyType));
+                        if(e instanceof DefaultEnemy)items.add(new point(this, e.getX(), e.getY(), enemyType));
                         enemies.remove(j); // Remove the enemy if it's destroyed
                     }
     
@@ -356,6 +420,13 @@ class game extends JPanel implements Runnable // implements KeyListener
                 i--;
             }
         }
+
+        if (bombAvailable) {
+            bombsLabel.setText("Bomb: READY | press B");
+        }else{
+            bombsLabel.setText("Bomb: " + bombTimer / 60 + "/10");
+        }
+    
     }
 
 
@@ -426,6 +497,14 @@ class game extends JPanel implements Runnable // implements KeyListener
         if (key == KeyEvent.VK_SPACE) {
             shooting = true;
         }
+
+        if (key == KeyEvent.VK_B) {
+            if (bombAvailable) {
+                activateBomb();
+                bombAvailable = false;
+            }
+        }
+    
     
         updateVelocity();
 
@@ -633,7 +712,7 @@ class DefaultEnemy extends Enemy {
 }
 
 class shootingEnemy extends Enemy{
-    private int shootCooldown = 100;
+    private int shootCooldown = 150;
     private int currentCooldown = 0;
     private final int hitThreshold = 35; 
     private double velX = 1.5;
@@ -675,8 +754,8 @@ class shootingEnemy extends Enemy{
     }
 
     private void shoot() {
-    int numberOfBullets = 20;
-    double bulletSpeed = 5; // Speed of bullets
+    int numberOfBullets = 15;
+    double bulletSpeed = 4; // Speed of bullets
     double spreadAngle = Math.PI * 2; // Total angle of spread
     //direction
     double startAngle = Math.PI / 2 - spreadAngle / 2; 
@@ -786,20 +865,44 @@ abstract class item{
     protected double y;
     protected double velX;
     protected double velY;
-    public item(double x, double y, int enemyType) {
+    protected boolean magnet = false;
+    protected game gameInstance;
+    public item(game game, double x, double y, int enemyType) {
+        this.gameInstance = game;
         this.x = x;
         this.y = y;
         this.enemyType = enemyType;
     }
 
     public void tick() {
-        y++;
+        if (magnet) {
+            double playerX = gameInstance.getPlayerX();
+            double playerY = gameInstance.getPlayerY();
+            double speed = 3;
+
+            double deltaX = playerX - x;
+            double deltaY = playerY - y;
+            double distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+            if (distance > 1) { // Prevent division by zero
+                double directionX = deltaX / distance;
+                double directionY = deltaY / distance;
+
+                x += directionX * speed;
+                y += directionY * speed;
+            }
+        } else {
+            // Normal falling logic
+            x += velX;
+            y += velY;
+
+            velX *= 0.95;
+        }
+
     }
 
     public void render(Graphics g) {
         g.drawImage(item, (int)x, (int)y, null);
     }
-
     protected void setItemImage(String imagePath) {
         try {
             item = ImageIO.read(getClass().getResource(imagePath));
@@ -815,24 +918,21 @@ abstract class item{
     }
 
     public boolean isOffScreen() {
-        return y > game.HEIGHT - 50 || y < 0 + 50 || x < 0 + 350 || x > game.WIDTH - 350;
+        return y > game.HEIGHT - 50 || y < 0 + 50 || x < 0 + 340 || x > game.WIDTH - 340;
     }
+    public void attractToPlayer() {
+        this.magnet = true;
+    }
+
 }
 
 class point extends item{
 
-    public point(double x, double y, int enemyType) {
-        super(x, y, enemyType);
+    public point(game gameInstance, double x, double y, int enemyType) {
+        super(gameInstance, x, y, enemyType);
         setItemImage(MyConstants.FILE_POINT); 
         this.velX = (Math.random() - 0.5) * 2;
         this.velY = (Math.random() + 0.25) * 2; //between 0.5 and 2.5
-    }
-    @Override
-    public void tick(){
-        x += velX;
-        y += velY;
-
-        velX *= 0.95;
     }
     
 }
