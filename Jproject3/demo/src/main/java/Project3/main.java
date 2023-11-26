@@ -17,6 +17,7 @@ class StartMenu extends JFrame {
     private static String selectedDifficulty = "Normal"; 
 
     public StartMenu() {
+        requestFocus();
         setTitle("Start Menu");
         setBounds(200, 200, 700, 300);
         setLocationRelativeTo(null);

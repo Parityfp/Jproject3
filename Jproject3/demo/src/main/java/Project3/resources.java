@@ -15,10 +15,12 @@ interface MyConstants
     static final String FILE_SHIP     = RESOURCEPATH + "Ship_1.png";
     static final String FILE_BULLET     = RESOURCEPATH + "whitebullet.png";
     static final String FILE_BG     = RESOURCEPATH + "touhou15.gif";
+    static final String FILE_BG2     = RESOURCEPATH + "space.jpeg";
     static final String FILE_ALIEN1     = RESOURCEPATH + "tf.png";
     static final String FILE_ALIEN2     = RESOURCEPATH + "whitewoman.png";
     static final String FILE_ENEMYBULLET1     = RESOURCEPATH + "enemybullet.png";
     static final String FILE_ENEMYBULLET2     = RESOURCEPATH + "enemybullet2.png";
+
 
 //////////////////////////////////// ITEMS ////////////////////////////////////
 

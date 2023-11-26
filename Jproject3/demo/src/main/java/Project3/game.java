@@ -65,6 +65,8 @@ class game extends JPanel implements Runnable // implements KeyListener
     private int bombTimer = 0;
     private final int bombTimerThreshold = 10 * 60;
     private boolean bombAvailable = false;
+    private int starThreshold = 5000; // Initial score required for the first star
+    private int starThresholdIncrement = 40000;
 
     //same thing for enemies
     private List<Enemy> enemies = new ArrayList<>();
@@ -418,7 +420,14 @@ class game extends JPanel implements Runnable // implements KeyListener
         }
 
         //star spawn, 0.05% per tick, ~3% per second **add extra 0 first
-        if(Math.random() < 0.005) items.add(new star(this, new Random().nextInt(game.WIDTH - 350), 100, 3));
+        //if(Math.random() < 0.005) items.add(new star(this, new Random().nextInt(game.WIDTH - 350), 100, 3));
+
+        if (p.getPoints() >= starThreshold) {
+            items.add(new star(this, new Random().nextInt(game.WIDTH - 350), 100, 3));
+            starThreshold += starThresholdIncrement;
+            starThresholdIncrement *= 2; // comment for non - exponential growth
+        }
+    
 
         //item updating
         for (int i = 0; i < items.size(); i++) {
@@ -534,7 +543,6 @@ class game extends JPanel implements Runnable // implements KeyListener
         }
     
     }
-
 
     @Override
     protected void paintComponent(Graphics g) {
@@ -1025,6 +1033,8 @@ abstract class item{
 
             velX *= 0.95;
         }
+        if (x <= 0 + 350) x = 0 + 350;
+        if (x >= (1366 - 350) - 32) x = (1366 - 350) - 32;
 
     }
 
@@ -1046,7 +1056,7 @@ abstract class item{
     }
 
     public boolean isOffScreen() {
-        return y > game.HEIGHT - 50 || y < 0 + 50 || x < 0 + 340 || x > game.WIDTH - 340;
+        return y > game.HEIGHT - 50;
     }
     public void attractToPlayer() {
         this.magnet = true;
