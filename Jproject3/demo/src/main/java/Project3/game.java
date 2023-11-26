@@ -581,15 +581,21 @@ public void showGameOverScreen() {
     JLabel gameOverLabel = new JLabel("Game Over", SwingConstants.CENTER);
     gameOverLabel.setFont(new Font("Arial", Font.BOLD, 24));
 
+    // Display the score
+    int totalScore = p.getPoints(); // Assuming 'p' is your player object
+    JLabel scoreLabel = new JLabel("Total Score: " + totalScore, SwingConstants.CENTER);
+    scoreLabel.setFont(new Font("Arial", Font.BOLD, 16));
+
     JButton restartButton = new JButton("Back to Start Menu");
     restartButton.addActionListener(e -> {
         gameOverFrame.dispose(); // Close the Game Over screen
         new StartMenu().setVisible(true); // Show the Start Menu
     });
 
-    gameOverFrame.add(gameOverLabel, BorderLayout.CENTER);
+    gameOverFrame.add(gameOverLabel, BorderLayout.NORTH);
+    gameOverFrame.add(scoreLabel, BorderLayout.CENTER); // Add score label
     gameOverFrame.add(restartButton, BorderLayout.SOUTH);
-    gameOverFrame.setVisible(true); 
+    gameOverFrame.setVisible(true);
     SwingUtilities.getWindowAncestor(this).dispose();
 
 }
