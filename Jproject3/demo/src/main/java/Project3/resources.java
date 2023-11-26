@@ -22,7 +22,7 @@ interface MyConstants
 
 //////////////////////////////////// ITEMS ////////////////////////////////////
 
-    static final String FILE_STAR     = RESOURCEPATH + "greenstar.png";
+    static final String FILE_STAR     = RESOURCEPATH + "star.png";
     static final String FILE_POINT     = RESOURCEPATH + "point.png";
     static final String FILE_POWER     = RESOURCEPATH + "power.png";
 

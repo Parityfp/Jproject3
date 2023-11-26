@@ -83,27 +83,27 @@ class game extends JPanel implements Runnable // implements KeyListener
                 switch (this.difficulty) {
                     case "Baby":
                         ((shootingEnemy) newEnemy).setshootCooldown(200);
-                        ((shootingEnemy) newEnemy).sethitThreshold(5);
+                        ((shootingEnemy) newEnemy).sethitThreshold(10);
                         ((shootingEnemy) newEnemy).setNumberOfBullets(10);
                         break;
                     case "Easy":
                         ((shootingEnemy) newEnemy).setshootCooldown(300);
-                        ((shootingEnemy) newEnemy).sethitThreshold(10);
+                        ((shootingEnemy) newEnemy).sethitThreshold(25);
                         ((shootingEnemy) newEnemy).setNumberOfBullets(15);
                         break;
                     case "Normal":
                         ((shootingEnemy) newEnemy).setshootCooldown(150);
-                        ((shootingEnemy) newEnemy).sethitThreshold(15);
+                        ((shootingEnemy) newEnemy).sethitThreshold(40);
                         ((shootingEnemy) newEnemy).setNumberOfBullets(15);
                         break;
                     case "hard":
                         ((shootingEnemy) newEnemy).setshootCooldown(150);
-                        ((shootingEnemy) newEnemy).sethitThreshold(25);
+                        ((shootingEnemy) newEnemy).sethitThreshold(55);
                         ((shootingEnemy) newEnemy).setNumberOfBullets(20);
                         break;
                     case "Lunatic":
                         ((shootingEnemy) newEnemy).setshootCooldown(150);
-                        ((shootingEnemy) newEnemy).sethitThreshold(35);
+                        ((shootingEnemy) newEnemy).sethitThreshold(70);
                         ((shootingEnemy) newEnemy).setvelX(3);
                         break;
                     default:
@@ -126,12 +126,15 @@ class game extends JPanel implements Runnable // implements KeyListener
                 break;
             case "Easy":
                 enemySpawnThreshold = 150;
+                shootingEnemyCooldown = 240;
                 break;
             case "Normal":
                 enemySpawnThreshold = 60;
+                shootingEnemyCooldown = 180;
                 break;
             case "hard":
                 enemySpawnThreshold = 45;
+                shootingEnemyCooldown = 120;
                 break;
             case "Lunatic":
                 enemySpawnThreshold = 30;
@@ -828,7 +831,7 @@ class shootingEnemy extends Enemy{
     private int shootCooldown = 15;
     private int currentCooldown = 0;
     private int hitThreshold = 35; 
-    private double velX = 1.5;
+    private double velX = 1.5, velY = 1;
 
     private int numberOfBullets = 15;
     private double bulletSpeed = 4;
@@ -870,10 +873,14 @@ class shootingEnemy extends Enemy{
             x = (1366 - 350) - 64;
             velX = -velX;
         }
-        if (y <= 0 + 50) y = 0 + 50;
-        if (y >= 766 - 50){
-            y = 0;
-            x = 350 + new Random().nextInt(game.WIDTH - 700);
+        if (y <= 0 + 50) {
+            y = 0 + 50;
+            velY = -velY;
+        }
+        if (y >= 766 - 550){
+            y = 766 - 550;
+            velY = -velY;
+            //x = 350 + new Random().nextInt(game.WIDTH - 700);
         }
     }
 
