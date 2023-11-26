@@ -20,10 +20,18 @@ interface MyConstants
     static final String FILE_ENEMYBULLET1     = RESOURCEPATH + "enemybullet.png";
     static final String FILE_ENEMYBULLET2     = RESOURCEPATH + "enemybullet2.png";
 
+//////////////////////////////////// ITEMS ////////////////////////////////////
+
+    static final String FILE_STAR     = RESOURCEPATH + "greenstar.png";
+    static final String FILE_POINT     = RESOURCEPATH + "point.png";
+    static final String FILE_POWER     = RESOURCEPATH + "power.png";
+
     //----- audio files
     static final String FILE_SHOOT     = RESOURCEPATH + "plst00.wav";
     static final String FILE_HIT     = RESOURCEPATH + "graze.wav";
 
+    //----- IMPORTANT
+    static final String NON_SUSPICIOUS_LINK     = RESOURCEPATH + "https://www.youtube.com/watch?v=dQw4w9WgXcQ";
     
     //----- Sizes and locations
     static final int FRAMEWIDTH  = 1000;

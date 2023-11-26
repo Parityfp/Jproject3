@@ -49,6 +49,10 @@ class game extends JPanel implements Runnable // implements KeyListener
     private final int bulletThreshold = 5; // rate of the player's bullet
     private int totalBulletsShot = 0;
 
+    //same thing for items
+    private List<item> items = new ArrayList<>();
+
+
     //same thing for enemies
     private List<Enemy> enemies = new ArrayList<>();
     private int enemySpawnCounter = 0;
@@ -182,6 +186,7 @@ class game extends JPanel implements Runnable // implements KeyListener
         System.out.println("Game Tick Counter: " + gameTickCounter);
         System.out.println("Bullet Counter: " + bulletCounter);
         System.out.println("Total Bullets Shot: " + totalBulletsShot);
+        System.out.println("Points: " + p.getPoints());
 
         stop();
         
@@ -235,6 +240,18 @@ class game extends JPanel implements Runnable // implements KeyListener
             }
         }
 
+        //item updating
+        for (int i = 0; i < items.size(); i++) {
+            item it = items.get(i);
+            it.tick();
+            if(it.isOffScreen()){
+                items.remove(i);
+                i--; 
+            }
+            // Optionally, remove the item if it goes off-screen
+        }
+    
+
 
         //collision handling
         for (Enemy e : enemies) {
@@ -268,6 +285,7 @@ class game extends JPanel implements Runnable // implements KeyListener
                         bullets.remove(i); // Remove the bullet
                     }
                     if (e.isDestroyed()) {
+                        items.add(new point(e.getX(), e.getY()));
                         enemies.remove(j); // Remove the enemy if it's destroyed
                         if(e instanceof shootingEnemy) shootingEnemyActive = false;
                     }
@@ -278,6 +296,18 @@ class game extends JPanel implements Runnable // implements KeyListener
                     // Break out of the enemies loop since the bullet is removed
                     break;
                 }
+            }
+        }
+
+        //item collision with player
+        for (int i = 0; i < items.size(); i++) {
+            item it = items.get(i);
+            it.tick();
+            if (p.getBounds().intersects(it.getBounds())) {
+                // Increase player's points, can add if or case statement for how much to increase depending on the enmemy type
+                p.addPoints(1000);
+                items.remove(i);
+                i--;
             }
         }
     }
@@ -293,10 +323,9 @@ class game extends JPanel implements Runnable // implements KeyListener
         int startX = (WIDTH - 666) / 2;
         int startY = (HEIGHT - 666) / 2;
 
-        // Draw the GIF
+        // Draw the GIF TODO: THIS LINE CAUSES ERROR IN TERMINAL BUT WORKS
         g.drawImage(bg.getImage(), startX, startY, 666, 666, this);
 
-    
         // Render the player
         if (p != null) {
             p.render(g);
@@ -309,6 +338,11 @@ class game extends JPanel implements Runnable // implements KeyListener
             }
         }
 
+        //render items
+        for (item it : items) {
+            it.render(g);
+        }
+    
         //render enemies
         for (Enemy enemy : enemies) {
             if (enemy != null) {
@@ -403,6 +437,13 @@ class player {
 
     private BufferedImage player;
 
+    private int points = 0;
+    public void addPoints(int amount) {
+        points += amount;
+    }
+    public int getPoints(){
+        return points;
+    }
 
 
     public player(double x, double y){
@@ -480,6 +521,13 @@ abstract class Enemy {
 
     public Rectangle getBounds() {
         return new Rectangle((int)x, (int)y, enemyImage.getWidth()-10, enemyImage.getHeight()-10);
+    }
+
+    public double getX() {
+        return x;
+    }
+    public double getY() {
+        return y;
     }
 
     public boolean isDestroyed() {
@@ -610,10 +658,8 @@ class shootingEnemy extends Enemy{
 
 //////////////////////////////////// BULLET CLASS ////////////////////////////////////
 abstract class Bullet {
-    protected double x;
-    protected double y;
-    protected double dx; // X direction component
-    protected double dy; // Y direction component
+    protected double x, y, dx; // X direction
+    protected double dy; // Y direction
     protected double speed = 15.0;
     protected BufferedImage bullet;
     protected boolean isEnemyBullet;
@@ -636,7 +682,7 @@ abstract class Bullet {
     }
 
     public void tick() {
-        y -= speed; // Move the bullet upwards
+        y -= speed; // Moves the bullet upwards
     }
 
     public void render(Graphics g) {
@@ -654,8 +700,6 @@ abstract class Bullet {
             e.printStackTrace();
         }
     }
-
-
 }
 
 class playerBullet extends Bullet{
@@ -668,7 +712,6 @@ class playerBullet extends Bullet{
 
 
 class enemyBullet extends Bullet{
-    private BufferedImage bullet;
 
     public enemyBullet(double x, double y, double speed, double dx, double dy) {
         super(x, y, speed, dx, dy, true);
@@ -688,6 +731,56 @@ class enemyBullet extends Bullet{
     }
 }
 
+//////////////////////////////////// ITEM CLASS ////////////////////////////////////
+
+abstract class item{
+    protected BufferedImage item;
+    protected double x;
+    protected double y;
+    public item(double x, double y) {
+        this.x = x;
+        this.y = y;
+    }
+
+    public void tick() {
+        y++;
+    }
+
+    public void render(Graphics g) {
+        g.drawImage(item, (int)x, (int)y, null);
+    }
+
+    protected void setItemImage(String imagePath) {
+        try {
+            item = ImageIO.read(getClass().getResource(imagePath));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    public Rectangle getBounds() {
+        return new Rectangle((int)x, (int)y, item.getWidth(), item.getHeight());
+    }
+
+
+    public boolean isOffScreen() {
+        return y > game.HEIGHT - 50 || y < 0 + 50 || x < 0 + 350 || x > game.WIDTH - 350;
+    }
+}
+
+class point extends item{
+
+    public point(double x, double y) {
+        super(x, y);
+        setItemImage(MyConstants.FILE_POINT); 
+    }
+    @Override
+    public void tick(){
+        y++;
+    }
+    
+}
+
+    
 
 //////////////////////////////////// KEYINPUT CLASS ////////////////////////////////////
 
