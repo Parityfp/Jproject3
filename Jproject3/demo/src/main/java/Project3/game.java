@@ -74,7 +74,7 @@ class game extends JPanel implements Runnable // implements KeyListener
     private int enemySpawnThreshold = 30; 
     private boolean shootingEnemyActive = false;
     private int shootingEnemyTimer = 0;
-    private final int shootingEnemyCooldown = 5 * 60; 
+    private int shootingEnemyCooldown = 5 * 60; 
     private void addEnemy(double x, double y, String enemyType) {
         Enemy newEnemy;
         switch (enemyType) {
@@ -135,6 +135,7 @@ class game extends JPanel implements Runnable // implements KeyListener
                 break;
             case "Lunatic":
                 enemySpawnThreshold = 30;
+                shootingEnemyCooldown = 60;
                 break;
             default:
                 enemySpawnThreshold = 50;
@@ -190,7 +191,7 @@ class game extends JPanel implements Runnable // implements KeyListener
         bombsLabel.setBounds(WIDTH - 340, 85, 350, 30);
 
         //pause
-        pauseLabel = new JLabel("Time Paused, ESC to resume") {
+        pauseLabel = new JLabel("Time Stopped, ESC to resume") {
             @Override
             protected void paintComponent(Graphics g) {
                 g.setColor(new Color(255, 255, 255, 100)); // White with alpha
@@ -338,6 +339,7 @@ class game extends JPanel implements Runnable // implements KeyListener
         System.out.println("Total Bullets Shot: " + totalBulletsShot);
         System.out.println("Points: " + p.getPoints());
         System.out.println("Difficulty: " + this.difficulty);
+        System.out.println("powerups: " + p.getUpgrades());
 
         stop();
         
@@ -351,7 +353,21 @@ class game extends JPanel implements Runnable // implements KeyListener
         if (shooting) {
             // adjust the rate as needed
             if (bulletCounter % bulletThreshold == 0) {
-                bullets.add(new playerBullet(p.getX() + 9, p.getY()));
+                
+                if (p.getUpgrades() == 0) {
+                    bullets.add(new playerBullet(p.getX() + 9, p.getY()));
+                } else {
+                    // Fire multiple bullets with spread
+                    double spreadAngle = Math.toRadians(10); // Angle between each bullet
+                    int totalBullets = 1 + 2 * p.getUpgrades(); // Always an odd number to include the center bullet
+                    for (int i = 0; i < totalBullets; i++) {
+                        double angle = spreadAngle * (i - p.getUpgrades());
+                        double dx = Math.sin(angle);
+                        double dy = -Math.cos(angle);
+                        bullets.add(new playerBullet(p.getX(), p.getY(), 10.0, dx, dy, false));
+                    }
+                }
+            
                 totalBulletsShot++;
                 //TODO make sound loop WORK
                 SFX(MyConstants.FILE_SHOOT, false);
@@ -398,13 +414,16 @@ class game extends JPanel implements Runnable // implements KeyListener
             }
         }
 
+        //star spawn, 0.05% per tick, ~3% per second **add extra 0 first
+        if(Math.random() < 0.005) items.add(new star(this, new Random().nextInt(game.WIDTH - 350), 100, 3));
+
         //item updating
         for (int i = 0; i < items.size(); i++) {
             item it = items.get(i);
             it.tick();
             if(it.isOffScreen()){
                 items.remove(i);
-                i--; 
+                i--;
             }
             // Optionally, remove the item if it goes off-screen
         }
@@ -498,7 +517,9 @@ class game extends JPanel implements Runnable // implements KeyListener
                         pointsLabel.setText("" + p.getPoints());
                         break;
                 }
-        
+                if (it.getEnemyType() == 3) { // Assuming 2 is the type for stars
+                    p.addUpgrades();
+                }
                 items.remove(i);
                 i--;
             }
@@ -650,6 +671,13 @@ class player {
 
     private BufferedImage player;
 
+    private int upgrades;
+    public void addUpgrades() {
+        upgrades ++;
+    }
+    public int getUpgrades(){
+        return upgrades;
+    }
     private int points = 0;
     public void addPoints(int amount) {
         points += amount;
@@ -900,6 +928,8 @@ abstract class Bullet {
 
     public void tick() {
         y -= speed; // Moves the bullet upwards
+        x += dx * speed;
+        y += dy * speed;
     }
 
     public void render(Graphics g) {
@@ -907,7 +937,7 @@ abstract class Bullet {
     }
 
     public boolean isOffScreen() {
-        return y < 0;
+        return y > game.HEIGHT - 50 || y < 0 + 50 || x < 0 + 350 || x > game.WIDTH - 350;
     }
 
     protected void setBulletImage(String imagePath) {
@@ -924,7 +954,12 @@ class playerBullet extends Bullet{
     public playerBullet(double x, double y) {
         super(x, y);
         setBulletImage(MyConstants.FILE_BULLET); 
-        }
+    }
+    public playerBullet(double x, double y, double speed, double dx, double dy, boolean isEnemyBullet) {
+        super(x, y, speed, dx, dy, isEnemyBullet);
+        setBulletImage(MyConstants.FILE_BULLET); 
+    }
+
 }
 
 
@@ -940,11 +975,6 @@ class enemyBullet extends Bullet{
         x += dx * speed;
         y += dy * speed;
         //System.out.println("Bullet moving to x: " + x + ", y: " + y);
-    }
-
-    @Override
-    public boolean isOffScreen() {
-        return y > game.HEIGHT - 50 || y < 0 + 50 || x < 0 + 350 || x > game.WIDTH - 350;
     }
 }
 
@@ -1026,7 +1056,16 @@ class point extends item{
         this.velX = (Math.random() - 0.5) * 2;
         this.velY = (Math.random() + 0.25) * 2; //between 0.5 and 2.5
     }
-    
+}
+
+class star extends item{
+    public star(game gameInstance, double x, double y, int enemyType) {
+        super(gameInstance, x, y, enemyType);
+        setItemImage(MyConstants.FILE_STAR); 
+        this.velX = (Math.random() - 0.5) * 2;
+        this.velY = (Math.random() + 0.25) * 2; //between 0.5 and 2.5
+    }
+
 }
 
 //////////////////////////////////// KEYINPUT CLASS ////////////////////////////////////
