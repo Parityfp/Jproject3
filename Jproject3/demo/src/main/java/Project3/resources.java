@@ -29,6 +29,7 @@ interface MyConstants
     //----- audio files
     static final String FILE_SHOOT     = RESOURCEPATH + "plst00.wav";
     static final String FILE_HIT     = RESOURCEPATH + "graze.wav";
+    static final String FILE_BOMB     = RESOURCEPATH + "enep00.wav";
 
     //----- IMPORTANT
     static final String NON_SUSPICIOUS_LINK     = RESOURCEPATH + "https://www.youtube.com/watch?v=dQw4w9WgXcQ";
