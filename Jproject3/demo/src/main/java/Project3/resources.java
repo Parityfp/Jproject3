@@ -37,6 +37,10 @@ interface MyConstants
     static final String FILE_BOMB     = RESOURCEPATH + "lazer01.wav";
     static final String FILE_READY     = RESOURCEPATH + "ok00.wav";
     static final String FILE_TITLE     = RESOURCEPATH + "titlescreen.wav";
+    static final String FILE_BLING     = RESOURCEPATH + "kira00.wav";
+    static final String FILE_OK     = RESOURCEPATH + "ok00.wav";
+    static final String FILE_ITEM     = RESOURCEPATH + "item00.wav";
+    static final String FILE_THEME     = RESOURCEPATH + "discolor.wav";
 
     //----- IMPORTANT
     static final String NON_SUSPICIOUS_LINK     = RESOURCEPATH + "https://www.youtube.com/watch?v=dQw4w9WgXcQ";
@@ -83,13 +87,21 @@ private long lastSoundTime = 0;
         }
     }
     public void setVolume(float volume) { // Volume is a value between 0 and 1
-    if (clip != null) {
-        FloatControl gainControl = (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
+        if (clip != null) {
+            FloatControl gainControl = (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
 
-        if (volume < 0.0f)  volume = 0.0f;
-        if (volume > 1.0f)  volume = 1.0f;
-        float dB = (float)(Math.log(volume) / Math.log(10.0) * 20.0);
-        gainControl.setValue(dB);
+            if (volume < 0.0f)  volume = 0.0f;
+            if (volume > 1.0f)  volume = 1.0f;
+            float dB = (float)(Math.log(volume) / Math.log(10.0) * 20.0);
+            gainControl.setValue(dB);
+        }
+    }
+    public synchronized void stopSound() {
+    if (clip != null) {
+        clip.stop();
+        clip.setMicrosecondPosition(0); 
+        isClipPlaying = false;
     }
 }
+
 }

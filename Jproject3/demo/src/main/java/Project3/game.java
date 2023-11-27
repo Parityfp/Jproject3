@@ -54,7 +54,7 @@ class game extends JPanel implements Runnable // implements KeyListener
     private BufferedImage image = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
     private ImageIcon bg;
     private Clip clip; 
-    private MySoundEffect shoot, hit, bomb, ready;
+    private MySoundEffect shoot, hit, bomb, ready, bling, collect, music;
 
 
     private JLabel pointsLabel, bombsLabel, pauseLabel;
@@ -101,7 +101,7 @@ class game extends JPanel implements Runnable // implements KeyListener
     private int bombTimer = 0;
     private final int bombTimerThreshold = 10 * 60;
     private boolean bombAvailable = false;
-    private int starThreshold = 5000; // Initial score required for the first star
+    private int starThreshold = 20000; // Initial score required for the first star
     private int starThresholdIncrement = 80000;
 
     //same thing for enemies
@@ -254,6 +254,10 @@ class game extends JPanel implements Runnable // implements KeyListener
         this.hit = new MySoundEffect();
         this.bomb = new MySoundEffect();
         this.ready = new MySoundEffect();
+        this.bling = new MySoundEffect();
+        this.collect = new MySoundEffect();
+        this.music = new MySoundEffect();
+        //music.SFX(MyConstants.FILE_THEME, true, 0.25f);//the volume level, try from 0-1
         //should make a method for this
         pointsLabel = new JLabel("0");
         pointsLabel.setForeground(Color.WHITE); 
@@ -376,7 +380,6 @@ class game extends JPanel implements Runnable // implements KeyListener
         System.out.println("Difficulty: " + this.difficulty);
         System.out.println("powerups: " + p.getUpgrades());
         System.out.println("Cycles: " + (enemyHpMultiplier - 1));
-
         stop();
         
     }
@@ -384,6 +387,7 @@ class game extends JPanel implements Runnable // implements KeyListener
     private void tick() {
         if(isPaused)return;
         p.tick();
+        if(gameTickCounter == 1)music.SFX(MyConstants.FILE_THEME, true, 0.25f);//the volume level, try from 0-1
         gameTickCounter++;
 
         if (shooting) {
@@ -486,6 +490,7 @@ class game extends JPanel implements Runnable // implements KeyListener
         //if(Math.random() < 0.005) items.add(new star(this, new Random().nextInt(game.WIDTH - 350), 100, 3));
 
         if (p.getPoints() >= starThreshold) {
+            bling.SFX(MyConstants.FILE_BLING, false, 0.7f);
             items.add(new star(this, new Random().nextInt(game.WIDTH - 350), 100, 3));
             starThreshold += starThresholdIncrement;
             starThresholdIncrement *= 3; // comment for non - exponential growth
@@ -578,6 +583,7 @@ class game extends JPanel implements Runnable // implements KeyListener
                             }
                             attractDelay = 90; //after herta killed, how long till attract
                             items.add(new star(this, e.getX(), e.getY(), 3));
+                            bling.SFX(MyConstants.FILE_BLING, false, 0.7f);
                         }
                         if(e instanceof DefaultEnemy)items.add(new point(this, e.getX(), e.getY(), enemyType));
                         enemies.remove(j); // Remove the enemy if it's destroyed
@@ -597,12 +603,12 @@ class game extends JPanel implements Runnable // implements KeyListener
             }
         }
         
-
         //item collision with player
         for (int i = 0; i < items.size(); i++) {
             item it = items.get(i);
             it.tick();
             if (p.getBounds().intersects(it.getBounds())) {
+                collect.SFX(MyConstants.FILE_ITEM, false, 0.2f);
                 // Increase player's points, can add if or case statement for how much to increase depending on the enmemy type
                 switch (it.getEnemyType()) {
                     case 0:
@@ -850,7 +856,9 @@ class game extends JPanel implements Runnable // implements KeyListener
 
         gameOverFrame.setVisible(true); 
         //SwingUtilities.getWindowAncestor(this).dispose();
+        music.stopSound();
         SwingUtilities.getWindowAncestor(this).setVisible(false);
+
     }
 
     private void restartGame() {

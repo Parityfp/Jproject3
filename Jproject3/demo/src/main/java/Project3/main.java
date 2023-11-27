@@ -16,7 +16,7 @@ class StartMenu extends JFrame {
     private JPasswordField passwordField;
     private JButton creditsButton;
     private static String selectedDifficulty = "Lunatic"; 
-    private MySoundEffect title;
+    private static MySoundEffect title;
 
     public StartMenu() {
         requestFocus();
@@ -49,6 +49,7 @@ class StartMenu extends JFrame {
 
         //audio
         this.title = new MySoundEffect();
+        
 
         // Username and Password
         JPanel authPanel = new JPanel(new GridLayout(3, 2));
@@ -175,6 +176,9 @@ class StartMenu extends JFrame {
     public static String getDifficulty(){
         return selectedDifficulty;
     }
+    public static void stoptitleSound(){
+            title.stopSound();
+        }
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
@@ -190,6 +194,7 @@ class StartButton extends JButton implements MouseListener {
 
     private ImageIcon startImage;
     private game gameInstance;
+    private MySoundEffect title;
 
     public StartButton(game gameInstance) {
         // Load image from the resources
@@ -210,6 +215,8 @@ class StartButton extends JButton implements MouseListener {
         addMouseListener(this);
         this.gameInstance = gameInstance;
 
+        this.title = new MySoundEffect();
+
     }
 
     public void mousePressed(MouseEvent e) {
@@ -225,6 +232,8 @@ class StartButton extends JButton implements MouseListener {
     }
 
     public void mouseClicked(MouseEvent e) {
+        StartMenu.stoptitleSound();
+        title.SFX(MyConstants.FILE_OK, false, 0.7f);
         System.out.println("Game Started");
         // start game
         startGame();
