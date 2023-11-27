@@ -14,7 +14,7 @@ class StartMenu extends JFrame {
     private ImageIcon backgroundImg;
     private JTextField usernameField;
     private JPasswordField passwordField;
-    private JButton creditsButton;
+    private JButton creditsButton, guideButton;
     private static String selectedDifficulty = "Lunatic"; 
     private static MySoundEffect title;
 

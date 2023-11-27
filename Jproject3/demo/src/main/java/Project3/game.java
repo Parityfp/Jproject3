@@ -879,6 +879,7 @@ class game extends JPanel implements Runnable // implements KeyListener
         enemies.clear();
         items.clear(); 
         shootingEnemyTimer = 0;
+        enemyHpMultiplier = 1;
         shootingEnemyActive = false;
         rightPressed = false;
         leftPressed = false;
