@@ -19,7 +19,7 @@ class StartMenu extends JFrame {
     public StartMenu() {
         requestFocus();
         setTitle("Start Menu");
-        setBounds(200, 200, 600, 300);
+        setBounds(200, 200, 900, 600);
         setLocationRelativeTo(null);
         setVisible(true);
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
@@ -119,8 +119,10 @@ class StartMenu extends JFrame {
 
     private void AddBackground() {
         backgroundImg = new ImageIcon(getClass().getResource("spaceBG.png"));
-        ImageIcon gifBackground = new ImageIcon(getClass().getResource(MyConstants.FILE_BG3));
-        drawpane = new JLabel(gifBackground);
+        ImageIcon originalGif = new ImageIcon(getClass().getResource(MyConstants.FILE_BG3));
+        Image scaledImage = originalGif.getImage().getScaledInstance(getWidth(), getHeight(), Image.SCALE_DEFAULT);
+        ImageIcon scaledGif = new ImageIcon(scaledImage);
+        drawpane = new JLabel(scaledGif);
         //drawpane.setIcon(backgroundImg);
         drawpane.setLayout(null);
 

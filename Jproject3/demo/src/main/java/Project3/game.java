@@ -80,6 +80,8 @@ class game extends JPanel implements Runnable // implements KeyListener
     //stolen variables from magnet
     private double pspawnX; // Spawn at the left edge of the screen
     private double pspawnY; // Random Y position or a specific pattern
+    private int attractDelay = 0; //for Herta
+
     
     private double pdx = 1.0;
     private double pdy;
@@ -101,6 +103,7 @@ class game extends JPanel implements Runnable // implements KeyListener
     //same thing for enemies
     private List<Enemy> enemies = new ArrayList<>();
     private int enemySpawnCounter = 0;
+    private double enemyHpMultiplier =1;
     //this should be the main difficulty parameter
     private int enemySpawnThreshold = 30; 
     private boolean shootingEnemyActive = false;
@@ -110,7 +113,7 @@ class game extends JPanel implements Runnable // implements KeyListener
         Enemy newEnemy;
         switch (enemyType) {
             case "shootingEnemy":
-                newEnemy = new shootingEnemy(this, x, y, bullets);
+                newEnemy = new shootingEnemy(this, x, y, bullets, enemyHpMultiplier);
                 switch (this.difficulty) {
                     case "Baby":
                         ((shootingEnemy) newEnemy).setshootCooldown(200);
@@ -143,8 +146,12 @@ class game extends JPanel implements Runnable // implements KeyListener
                         break;
                 }
                 break;
+
+            case "Herta":
+                newEnemy = new Herta(this, x, y, enemyHpMultiplier);
+                break;
             default:
-                newEnemy = new DefaultEnemy(this, x, y);
+                newEnemy = new DefaultEnemy(this, x, y, enemyHpMultiplier);
                 break;
         }
         enemies.add(newEnemy);
@@ -154,18 +161,26 @@ class game extends JPanel implements Runnable // implements KeyListener
         switch (this.difficulty) {
             case "Baby":
                 enemySpawnThreshold = 300;
+                pspeed = 1.5;
+                plasmaCooldown = 120;
                 break;
             case "Easy":
                 enemySpawnThreshold = 150;
                 shootingEnemyCooldown = 240;
+                pspeed = 2;
+                plasmaCooldown = 105;
                 break;
             case "Normal":
                 enemySpawnThreshold = 60;
                 shootingEnemyCooldown = 180;
+                pspeed = 2;
+                plasmaCooldown = 90;
                 break;
             case "hard":
                 enemySpawnThreshold = 45;
                 shootingEnemyCooldown = 120;
+                pspeed = 2;
+                plasmaCooldown = 60;
                 break;
             case "Lunatic":
                 enemySpawnThreshold = 30;
@@ -196,6 +211,8 @@ class game extends JPanel implements Runnable // implements KeyListener
                     } 
             }
             if (e instanceof DefaultEnemy)items.add(new point(this, e.getX(), e.getY(), enemyType));
+
+
         }
         Iterator<Bullet> bulletIterator = bullets.iterator();
         while (bulletIterator.hasNext()) {
@@ -204,12 +221,18 @@ class game extends JPanel implements Runnable // implements KeyListener
                 bulletIterator.remove();
             }
         }
-
-        enemies.clear();
+        Iterator<Enemy> EnemyIterator = enemies.iterator();
+        while (EnemyIterator.hasNext()) {
+            Enemy enemy = EnemyIterator.next();
+            if (!(enemy instanceof Herta)) {
+                EnemyIterator.remove();
+            }
+        }
         enemySpawnCounter = 0;
         shootingEnemyTimer = 0;
         shootingEnemyActive = false;
         
+        //magnets to player cuz bomb
         for (item it : items) {
             it.attractToPlayer();
         }
@@ -429,7 +452,7 @@ class game extends JPanel implements Runnable // implements KeyListener
             shootingEnemyTimer++;
         }
         //indicates when enemies should stop spawning, for bosses or special events, number divides by 60 for time in secondsd
-        
+        //main game cycle
         int currentCycleTick = gameTickCounter % cycleLength;
         if(currentCycleTick < enemyPhaseLength){
             if (enemySpawnCounter >= enemySpawnThreshold) {
@@ -442,6 +465,15 @@ class game extends JPanel implements Runnable // implements KeyListener
                 enemySpawnCounter = 0;
             }
         }
+        if (currentCycleTick == cycleLength - 1) {  
+            enemyHpMultiplier++;
+            System.out.println("Cycle completed");
+        if (new Random().nextInt(100) < 100) { // chance for Herta to spawn every cycle
+            double x = new Random().nextDouble() * (WIDTH - 50);
+            addEnemy(x, 0, "Herta");
+            }
+        }
+
 
         //every second, adjust plasma spawn rate here. use prime numbers for main delay
         //added break time for player to clear enemies (5 seconds)
@@ -536,7 +568,7 @@ class game extends JPanel implements Runnable // implements KeyListener
         } 
 
 
-
+        //for enemy hit
         for (int i = bullets.size() - 1; i >= 0; i--) {
             Bullet b = bullets.get(i);
             // Reverse loop for enemies
@@ -559,7 +591,17 @@ class game extends JPanel implements Runnable // implements KeyListener
                                 // Spawn a new item with the offset
                                 items.add(new point(this, e.getX() + offsetX, e.getY() + offsetY, enemyType));
                             } 
-                        } 
+                        }else if (e instanceof Herta) {
+                            enemyType = 2;
+                            int numItems = 30;
+                            for (int k = 0; k < numItems; k++) {
+                                double offsetX = (Math.random() - 0.5) * 160; // Increase spread
+                                double offsetY = (Math.random() - 0.5) * 160;
+                                items.add(new point(this, e.getX() + offsetX, e.getY() + offsetY, enemyType));
+                            }
+                            attractDelay = 90; //after herta killed, how long till attract
+                            items.add(new star(this, e.getX(), e.getY(), 3));
+                        }
                         if(e instanceof DefaultEnemy)items.add(new point(this, e.getX(), e.getY(), enemyType));
                         enemies.remove(j); // Remove the enemy if it's destroyed
                     }
@@ -571,6 +613,13 @@ class game extends JPanel implements Runnable // implements KeyListener
                 }
             }
         }
+        if (attractDelay > 0) {
+            attractDelay--;
+            if (attractDelay == 0) {
+                for (item it : items) it.attractToPlayer();
+            }
+        }
+        
 
         //item collision with player
         for (int i = 0; i < items.size(); i++) {
@@ -586,6 +635,10 @@ class game extends JPanel implements Runnable // implements KeyListener
                         break;
                     case 1:
                         p.addPoints(500);
+                        pointsLabel.setText("" + p.getPoints());
+                        break;
+                    case 2:
+                        p.addPoints(5000);
                         pointsLabel.setText("" + p.getPoints());
                         break;
                     default:
@@ -941,12 +994,14 @@ abstract class Enemy {
     protected BufferedImage enemyImage;
     protected Rectangle bounds;
     protected int hitCount = 1;
+    protected double thresholdMultiplier = 1;
     protected boolean destroyed = false;
     protected List<Bullet> bulletList;
     game gameinstance;
 
-    public Enemy(game game, double x, double y) {
+    public Enemy(game game, double x, double y, double thresholdMultiplier) {
         this.gameinstance = game;
+        this.thresholdMultiplier = thresholdMultiplier;
         this.x = x;
         this.y = y;
         // Common initialization
@@ -970,6 +1025,9 @@ abstract class Enemy {
     public double getY() {
         return y;
     }
+    public void addThreshold(){
+        thresholdMultiplier++;
+    }
     
 
     public boolean isDestroyed() {
@@ -992,10 +1050,9 @@ class DefaultEnemy extends Enemy {
     private double frequency = 0.02;
     private int hitThreshold = 5; 
 
-    public DefaultEnemy(game gameInstance, double x, double y) {
-        super(gameInstance, x, y);
+    public DefaultEnemy(game gameInstance, double x, double y, double thresholdMultiplier) {
+        super(gameInstance, x, y, thresholdMultiplier);
         initialX = x;
-        // Load specific image for this enemy type
         try {
             enemyImage = ImageIO.read(getClass().getResource(MyConstants.FILE_ALIEN1));
         } catch (IOException e) {
@@ -1018,6 +1075,7 @@ class DefaultEnemy extends Enemy {
         } 
     }
 
+    //detects when to destroy enemy (how many hits)
     @Override
     public void hit() {
         hitCount++;
@@ -1039,8 +1097,8 @@ class shootingEnemy extends Enemy{
     private double startAngle = Math.PI / 2 - spreadAngle / 2;
 
 
-    public shootingEnemy(game gameInstance, double x, double y, List<Bullet> bulletList) {
-        super(gameInstance, x, y);
+    public shootingEnemy(game gameInstance, double x, double y, List<Bullet> bulletList, double thresholdMultiplier) {
+        super(gameInstance, x, y, thresholdMultiplier);
         this.bulletList = bulletList;
         try {
             enemyImage = ImageIO.read(getClass().getResource(MyConstants.FILE_ALIEN2));
@@ -1098,6 +1156,7 @@ class shootingEnemy extends Enemy{
     }
 }
 
+    //detects when to destroy enemy (how many hits)
     @Override
     public void hit() {
         hitCount++;
@@ -1107,6 +1166,55 @@ class shootingEnemy extends Enemy{
     }
 }
 
+class Herta extends Enemy{
+    private double velX = 1.5, velY = 1;
+    private int hitThreshold = 250; 
+    private ImageIcon enemyImage;
+    public Herta(game game, double x, double y, double thresholdMultiplier) {
+        super(game, x, y, thresholdMultiplier);
+        enemyImage = new ImageIcon(getClass().getResource(MyConstants.FILE_SPECIAL));
+    }
+
+    @Override
+    public void tick() {
+        y+=velY;
+        x+=velX;
+        if (x <= 0 + 350) {
+            x = (1366 - 350) - 200;
+            //velX = - velX;
+        }
+        if (x >= (1366 - 350) - 200) {
+            x = 0 + 350;
+            //velX = - velX;
+        }
+        if (y <= 0 + 50) {
+            y = 0 + 50;
+            velY = - velY;
+        }
+        if (y >= 766 - 100 - 166){
+            y = 766 - 100 - 166;
+            velY = - velY;
+        }
+    }
+
+    @Override
+    public void render(Graphics g) {
+        enemyImage.paintIcon(null, g, (int)x, (int)y);
+    }
+    @Override
+    public Rectangle getBounds() {
+        return new Rectangle((int)x, (int)y, enemyImage.getIconWidth() - 10, enemyImage.getIconHeight() - 10);
+    }
+    //detects when to destroy enemy (how many hits)
+    @Override
+    public void hit() {
+        hitCount++;
+        System.out.println(hitThreshold - hitCount);
+        if (hitCount >= hitThreshold) {
+            destroyed = true;
+        }
+    }
+}
 //////////////////////////////////// BULLET CLASS ////////////////////////////////////
 abstract class Bullet {
     protected double x, y, dx; // X direction
@@ -1208,7 +1316,6 @@ class playerBullet extends Bullet{
         x += dx * speed;
         y += dy * speed;
     }
-    
 }
 
 class enemyBullet extends Bullet{
@@ -1252,6 +1359,7 @@ abstract class item{
     protected double velY;
     protected boolean magnet = false;
     protected game gameInstance;
+    double speed;
     public item(game game, double x, double y, int enemyType) {
         this.gameInstance = game;
         this.x = x;
@@ -1263,7 +1371,8 @@ abstract class item{
         if (magnet) {
             double playerX = gameInstance.getPlayerX();
             double playerY = gameInstance.getPlayerY();
-            double speed = 3;
+            if (this.enemyType != 2) {this.speed = 3;}
+            else this.speed = 10;
 
             double deltaX = playerX - x;
             double deltaY = playerY - y;
@@ -1320,6 +1429,10 @@ class point extends item{
         setItemImage(MyConstants.FILE_POINT); 
         this.velX = (Math.random() - 0.5) * 2;
         this.velY = (Math.random() + 0.25) * 2; //between 0.5 and 2.5
+    }
+    @Override
+    public Rectangle getBounds() {
+        return new Rectangle((int)x, (int)y, item.getWidth()+10, item.getHeight()+10);
     }
 }
 
