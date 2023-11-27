@@ -22,18 +22,17 @@ import java.util.List;
 import java.util.Random;
 
 import javax.imageio.ImageIO;
-import javax.sound.sampled.AudioInputStream;
-import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
-import javax.sound.sampled.FloatControl;
-import javax.sound.sampled.LineEvent;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JSlider;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 //TODO arraylist for sounds
 class game extends JPanel implements Runnable // implements KeyListener
@@ -278,6 +277,8 @@ class game extends JPanel implements Runnable // implements KeyListener
                 g.fillRect(0, 0, getWidth(), getHeight());
                 super.paintComponent(g);
             }
+
+            
         };
         pauseLabel.setOpaque(false);
         pauseLabel.setForeground(Color.WHITE);
@@ -285,11 +286,14 @@ class game extends JPanel implements Runnable // implements KeyListener
         pauseLabel.setBounds(350, 50, 666, 666);
         pauseLabel.setHorizontalAlignment(SwingConstants.CENTER);
         pauseLabel.setVisible(false);
+        pauseLabel.setLayout(new BorderLayout());
         
         this.setLayout(null); // null layout for absolute positioning
         this.add(pointsLabel);
         this.add(bombsLabel);
         this.add(pauseLabel);
+
+        
 
         p = new player(WIDTH / 2, HEIGHT - 32);
         bg = new ImageIcon(getClass().getResource(MyConstants.FILE_BG));
@@ -659,27 +663,29 @@ class game extends JPanel implements Runnable // implements KeyListener
         int startY = (HEIGHT - 666) / 2;
 
         // Draw the GIF TODO: THIS LINE CAUSES ERROR IN TERMINAL BUT WORKS
-        g.drawImage(bg.getImage(), startX, startY, 666, 666, this);
-
+        if (bg != null) {
+            g.drawImage(bg.getImage(), startX, startY, 666, 666, this);
+        }
+    
         // Render the player
         if (p != null) {
             p.render(g);
         }
     
         // Render bullets
-        for (Bullet bullet : bullets) {
+        for (Bullet bullet : new ArrayList<>(bullets)) {
             if (bullet != null) {
                 bullet.render(g);
             }
         }
 
         //render items
-        for (item it : items) {
+        for (item it : new ArrayList<>(items)) {
             it.render(g);
         }
     
         //render enemies
-        for (Enemy enemy : enemies) {
+        for (Enemy enemy : new ArrayList<>(enemies)) {
             if (enemy != null) {
                 enemy.render(g);
             }
@@ -863,7 +869,6 @@ class game extends JPanel implements Runnable // implements KeyListener
 
     private void restartGame() {
         stop();
-
         //TODO NOT SURE IF I HAVE EVERYTHING TO RESET HERE. add more if needed plz
         gameTickCounter = 0;
         bulletCounter = 0;
@@ -882,6 +887,7 @@ class game extends JPanel implements Runnable // implements KeyListener
         isDragging = false;
         shooting = false;
         bombTimer = 0;
+        bombAvailable = false;
         pointsLabel.setText("");
         bombsLabel.setText("Bomb: "); 
         SwingUtilities.invokeLater(() -> {
@@ -1421,7 +1427,7 @@ class point extends item{
     }
     @Override
     public Rectangle getBounds() {
-        return new Rectangle((int)x, (int)y, item.getWidth()+10, item.getHeight()+10);
+        return new Rectangle((int)x, (int)y, item.getWidth()+10, item.getHeight());
     }
 }
 
