@@ -3,6 +3,7 @@ package Project3;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Rectangle;
@@ -212,7 +213,7 @@ class game extends JPanel implements Runnable // implements KeyListener
         requestFocus();
         initDifficulty();
         //should make a method for this
-        pointsLabel = new JLabel("");
+        pointsLabel = new JLabel("0");
         pointsLabel.setForeground(Color.WHITE); 
         pointsLabel.setFont(new Font("Monospaced", Font.BOLD, 22));
         pointsLabel.setBounds(WIDTH - 340, 45, 350, 30);
@@ -270,20 +271,10 @@ class game extends JPanel implements Runnable // implements KeyListener
             e.printStackTrace();
         };
 
-        System.exit(0);
     }
 
-    public void setRunning(boolean running) {
-        this.running = running;
-        try {
-            if (!running && thread != null) {
-                thread.join();
-            }
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        System.exit(0);
-    }
+
+
 
 
     private long lastSoundTime = 0;
@@ -337,7 +328,7 @@ class game extends JPanel implements Runnable // implements KeyListener
         frame.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
-                game.setRunning(false);
+                System.exit(0);
             }
         });
         game.start();
@@ -774,7 +765,7 @@ class game extends JPanel implements Runnable // implements KeyListener
     //GAME OVER SCREEN//
     public void showGameOverScreen() {
         JFrame gameOverFrame = new JFrame("Game Over");
-        gameOverFrame.setSize(300, 200);
+        gameOverFrame.setSize(500, 350);
         gameOverFrame.setLayout(new BorderLayout());
         gameOverFrame.setLocationRelativeTo(null); // Center on screen
         String gameOverText = "<html>Game Over<br/>Score: " + p.getPoints() + "</html>";
@@ -784,19 +775,77 @@ class game extends JPanel implements Runnable // implements KeyListener
     
         JButton restartButton = new JButton("Back to Start Menu");
         restartButton.addActionListener(e -> {
+            SwingUtilities.getWindowAncestor(this).dispose();
             gameOverFrame.dispose(); // Close the Game Over screen
             new StartMenu().setVisible(true); // Show the Start Menu
         });
-    
+
+        JButton retryButton = new JButton("Retry");
+        retryButton.addActionListener(e -> {
+            //SwingUtilities.getWindowAncestor(this).dispose();
+            SwingUtilities.getWindowAncestor(this).setVisible(true);
+            gameOverFrame.dispose(); // Close the Game Over screen
+            restartGame();
+            
+        });
+        JButton exitButton = new JButton("Exit");
+        exitButton.addActionListener(e -> {
+            stop();
+            running = false;
+            SwingUtilities.getWindowAncestor(this).dispose();
+            gameOverFrame.dispose(); // Close the Game Over screen
+            System.exit(0); 
+        });
+
+        gameOverFrame.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                System.exit(0);
+            }
+        });
+
+        JPanel buttonPanel = new JPanel(new FlowLayout());
+        buttonPanel.add(retryButton);
+        buttonPanel.add(restartButton);
+        buttonPanel.add(exitButton);
+
         gameOverFrame.add(gameOverLabel, BorderLayout.CENTER);
-        gameOverFrame.add(restartButton, BorderLayout.SOUTH);
+        gameOverFrame.add(buttonPanel, BorderLayout.SOUTH);
+
         gameOverFrame.setVisible(true); 
         //SwingUtilities.getWindowAncestor(this).dispose();
         SwingUtilities.getWindowAncestor(this).setVisible(false);
-    
+    }
+
+    private void restartGame() {
+        stop();
+
+        //TODO NOT SURE IF I HAVE EVERYTHING TO RESET HERE. add more if needed plz
+        gameTickCounter = 0;
+        bulletCounter = 0;
+        totalBulletsShot = 0;
+        p.setPoints(0);
+        p.setUpgrades(0);
+        bullets.clear();
+        enemies.clear();
+        items.clear(); 
+        shootingEnemyTimer = 0;
+        shootingEnemyActive = false;
+        rightPressed = false;
+        leftPressed = false;
+        upPressed = false;
+        downPressed = false;
+        isDragging = false;
+        shooting = false;
+        bombTimer = 0;
+        pointsLabel.setText("");
+        bombsLabel.setText("Bomb: "); 
+        SwingUtilities.invokeLater(() -> {
+            init();
+            start();
+        });
     }
 }
-
 
 //////////////////////////////////// PLAYER CLASS ////////////////////////////////////
 
@@ -817,12 +866,18 @@ class player {
     public int getUpgrades(){
         return upgrades;
     }
+    public void setUpgrades(int upgrades){
+        this.upgrades = upgrades;
+    }
     private int points = 0;
     public void addPoints(int amount) {
         points += amount;
     }
     public int getPoints(){
         return points;
+    }
+    public void setPoints(int points){
+        this.points = points;
     }
 
 
@@ -1093,10 +1148,10 @@ abstract class Bullet {
                 y += directionY * speed;
             }
             //bounds
-            if (x <= 0 + 350 && x >= 0) x = 0 + 342;
-            if (x >= ((1366 - 350) - 120) && x <= 1366) x = (1366 - 350) - 120;
+            if (x <= 0 + 340 && x >= 0 + 250) x = 0 + 342;
+            if (x >= ((1366 - 350) - 120) && x <= 1366 - 250) x = (1366 - 350) - 120;
             if (y <= 0 + 42) y = 0 + 42;
-            if (y >= 768 - 50 - 120) y = 768 - 50 - 120;
+            if (y >= 768 - 50 - 120 ) y = 768 - 50 - 120;
         } else{
             //y -= speed; // Moves the bullet upwards
             x += dx * speed;
@@ -1176,7 +1231,7 @@ class plasma extends enemyBullet{
     }
     @Override
     public boolean isOffScreen() {
-        return y > game.HEIGHT|| y < 0 || x < 0 || x > game.WIDTH;
+        return y > game.HEIGHT|| y < 0 || x < 0 + 300 || x > game.WIDTH - 300;
     }
 
 }

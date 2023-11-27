@@ -19,7 +19,7 @@ class StartMenu extends JFrame {
     public StartMenu() {
         requestFocus();
         setTitle("Start Menu");
-        setBounds(200, 200, 700, 300);
+        setBounds(200, 200, 600, 300);
         setLocationRelativeTo(null);
         setVisible(true);
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
@@ -62,7 +62,7 @@ class StartMenu extends JFrame {
 
         //Credits button
         creditsButton = new JButton("Credits");
-        creditsButton.setBounds(570, 220, 100, 30);
+        creditsButton.setBounds(480, 220, 100, 30);
         contentPane.add(creditsButton);
 
         creditsButton.addActionListener(new ActionListener() {
