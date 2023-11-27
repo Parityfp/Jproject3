@@ -192,7 +192,15 @@ class game extends JPanel implements Runnable // implements KeyListener
             }
             if (e instanceof DefaultEnemy)items.add(new point(this, e.getX(), e.getY(), enemyType));
         }
-        bullets.clear();
+
+        //only clear non-plasma bullets
+        Iterator<Bullet> itr = bullets.iterator();
+        while (itr.hasNext()) {
+            Bullet bullet = itr.next();
+            if (!(bullet instanceof plasma)) {
+                itr.remove();
+            }
+        }
         enemies.clear();
         enemySpawnCounter = 0;
         shootingEnemyTimer = 0;
@@ -387,7 +395,7 @@ class game extends JPanel implements Runnable // implements KeyListener
         if (shooting) {
             // adjust the rate as needed
             if (bulletCounter % bulletThreshold == 0) {
-                
+                System.out.println("upgrades " +p.getUpgrades());
                 if (p.getUpgrades() == 0) {
                     bullets.add(new playerBullet(p.getX() + 9, p.getY()));
                 } else {
@@ -1171,6 +1179,12 @@ class plasma extends enemyBullet{
     @Override
     public boolean isOffScreen() {
         return y > game.HEIGHT|| y < 0 || x < 0 || x > game.WIDTH;
+    }
+
+    @Override
+    public void render(Graphics g) {
+        g.drawImage(bullet, (int)x, (int)y, null);
+        System.out.println("plasma rendered");
     }
 
 }
