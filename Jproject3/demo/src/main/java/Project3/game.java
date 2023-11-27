@@ -80,13 +80,14 @@ class game extends JPanel implements Runnable // implements KeyListener
     //stolen variables from magnet
     private double pspawnX; // Spawn at the left edge of the screen
     private double pspawnY; // Random Y position or a specific pattern
-    private double pspeed = 2;
+    
     private double pdx = 1.0;
     private double pdy;
-    private int plasmaThreshold = 3;
-    private int plasmacount;
+    private double pspeed = 2;
+    private double plasmaCooldown;
     private int plasmaTimer = 1500; //timer till first plasma appears
-
+    private int cycleLength = 1800; // Total length of one cycle
+    private int enemyPhaseLength = 1200;
     
 
     //same thing for items
@@ -169,7 +170,8 @@ class game extends JPanel implements Runnable // implements KeyListener
             case "Lunatic":
                 enemySpawnThreshold = 30;
                 shootingEnemyCooldown = 60;
-                plasmaTimer = 30;
+                pspeed = 3;
+                plasmaCooldown = 45;
                 break;
             default:
                 enemySpawnThreshold = 50;
@@ -195,7 +197,14 @@ class game extends JPanel implements Runnable // implements KeyListener
             }
             if (e instanceof DefaultEnemy)items.add(new point(this, e.getX(), e.getY(), enemyType));
         }
-        bullets.clear();
+        Iterator<Bullet> bulletIterator = bullets.iterator();
+        while (bulletIterator.hasNext()) {
+            Bullet bullet = bulletIterator.next();
+            if (!(bullet instanceof plasma)) {
+                bulletIterator.remove();
+            }
+        }
+
         enemies.clear();
         enemySpawnCounter = 0;
         shootingEnemyTimer = 0;
@@ -421,7 +430,8 @@ class game extends JPanel implements Runnable // implements KeyListener
         }
         //indicates when enemies should stop spawning, for bosses or special events, number divides by 60 for time in secondsd
         
-        if(gameTickCounter < 1200){
+        int currentCycleTick = gameTickCounter % cycleLength;
+        if(currentCycleTick < enemyPhaseLength){
             if (enemySpawnCounter >= enemySpawnThreshold) {
                 addEnemy(new Random().nextDouble() * (WIDTH - 50), 0, "DefaultEnemy"); // Example: spawn at a random x position at the top
                 if (!shootingEnemyActive && shootingEnemyTimer >= shootingEnemyCooldown) {
@@ -435,7 +445,7 @@ class game extends JPanel implements Runnable // implements KeyListener
 
         //every second, adjust plasma spawn rate here. use prime numbers for main delay
         //added break time for player to clear enemies (5 seconds)
-        if (gameTickCounter > plasmaTimer && gameTickCounter % 60 == 0 && plasmacount < plasmaThreshold ) {
+        if (currentCycleTick > plasmaTimer && currentCycleTick % plasmaCooldown == 0) {
             //shoot();
             //random position for plasma bullets
             if(Math.random() < 0.5){
@@ -449,13 +459,9 @@ class game extends JPanel implements Runnable // implements KeyListener
             pspawnY = 50 + (Math.random() * 350);
             plasma plasmaBullet = new plasma(this, pspawnX, pspawnY, pspeed, pdx, pdy, true);
             bullets.add(plasmaBullet);
-            plasmacount++;
         } 
         for (Bullet p : bullets) if (p instanceof plasma) p.attractToPlayer();
-        for (Bullet p : bullets) {
-            if (p instanceof plasma) break;
-            plasmacount = 0;
-        }
+        
 
         // Update and remove enemies
         Iterator<Enemy> iterator = enemies.iterator();
@@ -1211,7 +1217,6 @@ class enemyBullet extends Bullet{
         super(gameInstance, x, y, speed, dx, dy, isEnemyBullet);
         setBulletImage(MyConstants.FILE_ENEMYBULLET2); 
     }
-
 
     @Override
     public boolean isOffScreen() {
