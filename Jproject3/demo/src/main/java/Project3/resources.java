@@ -17,7 +17,7 @@ interface MyConstants
     static final String FILE_BG     = RESOURCEPATH + "touhou15.gif";
     static final String FILE_BG2     = RESOURCEPATH + "space.jpeg";
     static final String FILE_BG3     = RESOURCEPATH + "backGround1.gif";
-    static final String FILE_ALIEN1     = RESOURCEPATH + "tf.png";
+    static final String FILE_ALIEN1     = RESOURCEPATH + "tako.gif";
     static final String FILE_ALIEN2     = RESOURCEPATH + "whitewoman.png";
     static final String FILE_SPECIAL     = RESOURCEPATH + "kuru2.gif";
     static final String FILE_ENEMYBULLET1     = RESOURCEPATH + "enemybullet.png";
@@ -54,7 +54,7 @@ class MySoundEffect
 {
 private long lastSoundTime = 0;
     private Clip clip;
-    private final long SOUND_COOLDOWN = 0; 
+    private final long SOUND_COOLDOWN = 10; 
     private boolean isClipPlaying = false;
     public synchronized void SFX(String soundFileName, boolean loop, float volume) {
         long currentTime = System.currentTimeMillis();

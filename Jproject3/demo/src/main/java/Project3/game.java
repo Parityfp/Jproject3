@@ -1025,16 +1025,12 @@ class DefaultEnemy extends Enemy {
     private double speedY = 1; 
     private double amplitude = 20;
     private double frequency = 0.02;
-    private int hitThreshold = 5; 
-
+    private int hitThreshold = 5;
+    private ImageIcon enemyImage;
     public DefaultEnemy(game gameInstance, double x, double y, double thresholdMultiplier) {
         super(gameInstance, x, y, thresholdMultiplier);
         initialX = x;
-        try {
-            enemyImage = ImageIO.read(getClass().getResource(MyConstants.FILE_ALIEN1));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        enemyImage = new ImageIcon(getClass().getResource(MyConstants.FILE_ALIEN1));
     }
 
     @Override
@@ -1050,6 +1046,14 @@ class DefaultEnemy extends Enemy {
             y = 0;
             initialX = 350 + new Random().nextInt(game.WIDTH - 700);
         } 
+    }
+    @Override
+    public void render(Graphics g) {
+        enemyImage.paintIcon(null, g, (int)x, (int)y);
+    }
+    @Override
+    public Rectangle getBounds() {
+        return new Rectangle((int)x, (int)y, enemyImage.getIconWidth() - 10, enemyImage.getIconHeight() - 10);
     }
 
     //detects when to destroy enemy (how many hits)
