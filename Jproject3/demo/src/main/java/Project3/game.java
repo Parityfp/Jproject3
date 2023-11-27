@@ -399,6 +399,7 @@ class game extends JPanel implements Runnable // implements KeyListener
         System.out.println("Points: " + p.getPoints());
         System.out.println("Difficulty: " + this.difficulty);
         System.out.println("powerups: " + p.getUpgrades());
+        System.out.println("Cycles: " + (enemyHpMultiplier - 1));
 
         stop();
         
@@ -1079,7 +1080,7 @@ class DefaultEnemy extends Enemy {
     @Override
     public void hit() {
         hitCount++;
-        if (hitCount >= hitThreshold) {
+        if (hitCount >= hitThreshold * thresholdMultiplier) {
             destroyed = true;
         }
     }
@@ -1160,7 +1161,7 @@ class shootingEnemy extends Enemy{
     @Override
     public void hit() {
         hitCount++;
-        if (hitCount >= hitThreshold) {
+        if (hitCount >= hitThreshold * thresholdMultiplier) {
             destroyed = true;
         }
     }
@@ -1209,8 +1210,8 @@ class Herta extends Enemy{
     @Override
     public void hit() {
         hitCount++;
-        System.out.println(hitThreshold - hitCount);
-        if (hitCount >= hitThreshold) {
+        System.out.println((hitThreshold * thresholdMultiplier) - hitCount);
+        if (hitCount >= hitThreshold * thresholdMultiplier) {
             destroyed = true;
         }
     }
