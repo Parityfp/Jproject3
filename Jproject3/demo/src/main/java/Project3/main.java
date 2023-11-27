@@ -220,6 +220,9 @@ class StartButton extends JButton implements MouseListener {
     public void startGame() {
         game gameInstance = new game(StartMenu.getDifficulty());
         gameInstance.addKeyListener(new KeyInput(gameInstance));
+        MouseInput mouseInput = new MouseInput(gameInstance);
+        gameInstance.addMouseListener(mouseInput);
+        gameInstance.addMouseMotionListener(mouseInput);
 
         JFrame gameFrame = new JFrame(game.TITLE);
         gameFrame.add(gameInstance);

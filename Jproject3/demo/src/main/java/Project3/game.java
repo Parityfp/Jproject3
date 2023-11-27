@@ -84,6 +84,7 @@ class game extends JPanel implements Runnable // implements KeyListener
     private double pdy;
     private int plasmaThreshold = 3;
     private int plasmacount;
+    private int plasmaTimer = 1500; //timer till first plasma appears
 
     
 
@@ -167,6 +168,7 @@ class game extends JPanel implements Runnable // implements KeyListener
             case "Lunatic":
                 enemySpawnThreshold = 30;
                 shootingEnemyCooldown = 60;
+                plasmaTimer = 30;
                 break;
             default:
                 enemySpawnThreshold = 50;
@@ -398,7 +400,7 @@ class game extends JPanel implements Runnable // implements KeyListener
                         double angle = spreadAngle * (i - p.getUpgrades());
                         double dx = Math.sin(angle);
                         double dy = -Math.cos(angle);
-                        bullets.add(new playerBullet(this, p.getX(), p.getY(), 10.0, dx, dy, false));
+                        bullets.add(new playerBullet(this, p.getX() + 9, p.getY() + 9, 10.0, dx, dy, false));
                     }
                 }
             
@@ -442,7 +444,7 @@ class game extends JPanel implements Runnable // implements KeyListener
 
         //every second, adjust plasma spawn rate here. use prime numbers for main delay
         //added break time for player to clear enemies (5 seconds)
-        if (gameTickCounter > 1500 && gameTickCounter % 60 == 0 && plasmacount < plasmaThreshold ) {
+        if (gameTickCounter > plasmaTimer && gameTickCounter % 60 == 0 && plasmacount < plasmaThreshold ) {
             //shoot();
             //random position for plasma bullets
             if(Math.random() < 0.5){
@@ -512,6 +514,7 @@ class game extends JPanel implements Runnable // implements KeyListener
                     System.out.println("player hit by enemy bullet, GAME OVER");
                     //SwingUtilities.invokeLater(this::showGameOverScreen);
                     running = false;
+                    SwingUtilities.invokeLater(this::showGameOverScreen);
                     return;
                 }
             }
@@ -667,7 +670,9 @@ class game extends JPanel implements Runnable // implements KeyListener
     }
 
     public void mousePressed(MouseEvent e){
+        
         for (Bullet p : bullets) {    
+            System.out.println(p.getClass().getSimpleName());
             if (p instanceof plasma && p.getBounds().contains(e.getPoint())) {
                 selectedBullet = p;
                 isDragging = true;
@@ -1044,7 +1049,7 @@ class shootingEnemy extends Enemy{
 //////////////////////////////////// BULLET CLASS ////////////////////////////////////
 abstract class Bullet {
     protected double x, y, dx; // X direction
-    protected double dy; // Y direction
+    protected double dy = -1; // Y direction
     protected double speed = 15.0;
     protected BufferedImage bullet;
     protected boolean isEnemyBullet;
@@ -1139,7 +1144,8 @@ class playerBullet extends Bullet{
     }
     @Override
     public void tick(){
-        y-=speed;
+        x += dx * speed;
+        y += dy * speed;
     }
     
 }
@@ -1154,7 +1160,7 @@ class enemyBullet extends Bullet{
 
     @Override
     public boolean isOffScreen() {
-        return y > game.HEIGHT - 50 || y < 0 + 50 || x < 0 + 350 || x > game.WIDTH - 350 -120;
+        return y > game.HEIGHT - 50 - 32 || y < 0 + 50 || x < 0 + 350 || x > game.WIDTH - 350 - 32;
     }
 }
 
