@@ -25,6 +25,7 @@ import javax.imageio.ImageIO;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
+import javax.sound.sampled.FloatControl;
 import javax.sound.sampled.LineEvent;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -52,6 +53,8 @@ class game extends JPanel implements Runnable // implements KeyListener
 
     private BufferedImage image = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
     private ImageIcon bg;
+    private Clip clip; 
+
 
     private JLabel pointsLabel, bombsLabel, pauseLabel;
 
@@ -197,7 +200,7 @@ class game extends JPanel implements Runnable // implements KeyListener
     //bomb stuff
     private void activateBomb() {
         // Play bomb sound and gif
-        SFX(MyConstants.FILE_BOMB, false);
+        SFX(MyConstants.FILE_BOMB, false, 0.5f);
         //copy item generation technique from other method
         for (Enemy e : enemies) {
             int enemyType = 0;
@@ -281,7 +284,6 @@ class game extends JPanel implements Runnable // implements KeyListener
         bg = new ImageIcon(getClass().getResource(MyConstants.FILE_BG));
         enemies = new ArrayList<>();
         
-        
     }
 
     synchronized public void start() {
@@ -305,21 +307,18 @@ class game extends JPanel implements Runnable // implements KeyListener
 
     }
 
-
-
-
-
     private long lastSoundTime = 0;
     private final long SOUND_COOLDOWN = 0; 
     private boolean isClipPlaying = false;
-    private synchronized void SFX(String soundFileName, boolean loop) {
+    private synchronized void SFX(String soundFileName, boolean loop, float volume) {
         long currentTime = System.currentTimeMillis();
         if (currentTime - lastSoundTime > SOUND_COOLDOWN && !isClipPlaying) {
             lastSoundTime = currentTime;
             try {
             AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(getClass().getResource(soundFileName));
-            Clip clip = AudioSystem.getClip();
+            clip = AudioSystem.getClip();
             clip.open(audioInputStream);
+            setVolume(volume); 
             clip.setMicrosecondPosition(0);
             if (loop) {
                 isClipPlaying = true;
@@ -337,6 +336,18 @@ class game extends JPanel implements Runnable // implements KeyListener
         } catch (Exception e) {e.printStackTrace(); }
         }
     }
+    public void setVolume(float volume) { // Volume is a value between 0 and 1
+    if (clip != null) {
+        FloatControl gainControl = (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
+
+        if (volume < 0.0f)  volume = 0.0f;
+        if (volume > 1.0f)  volume = 1.0f;
+        float dB = (float)(Math.log(volume) / Math.log(10.0) * 20.0);
+        gainControl.setValue(dB);
+    }
+}
+
+
 
     //main method is only for testing here since we are launching the game through main.java
     public static void main(String args[]) {
@@ -430,7 +441,7 @@ class game extends JPanel implements Runnable // implements KeyListener
             
                 totalBulletsShot++;
                 //TODO make sound loop WORK
-                SFX(MyConstants.FILE_SHOOT, false);
+                SFX(MyConstants.FILE_SHOOT, false, 0.2f);
             }
             bulletCounter++;
         }
@@ -529,7 +540,7 @@ class game extends JPanel implements Runnable // implements KeyListener
         if (!bombAvailable) {
             bombTimer++;
             if (bombTimer >= bombTimerThreshold - 1) {
-                SFX(MyConstants.FILE_READY, false);
+                SFX(MyConstants.FILE_READY, false, 0.5f);
             }
             if (bombTimer >= bombTimerThreshold) {
                 bombAvailable = true;
@@ -563,7 +574,7 @@ class game extends JPanel implements Runnable // implements KeyListener
                     // Handle collision between bullet and enemy
                     // Remove the enemy and the bullet, or mark them for removal
                     //System.out.println("enemy hit");
-                    SFX(MyConstants.FILE_HIT, false);
+                    SFX(MyConstants.FILE_HIT, false, 0.3f);
                 }
             }
         } 
@@ -656,7 +667,7 @@ class game extends JPanel implements Runnable // implements KeyListener
         }
 
         if (bombAvailable) {
-            bombsLabel.setText("Bomb: READY | press B");
+            bombsLabel.setText("Bomb: READY | press SHIFT");
         }else{
             bombsLabel.setText("Bomb: " + bombTimer / 60 + "/10");
         }
@@ -773,7 +784,7 @@ class game extends JPanel implements Runnable // implements KeyListener
             pauseLabel.setVisible(isPaused);
         }
 
-        if (key == KeyEvent.VK_B) {
+        if (key == KeyEvent.VK_SHIFT) {
             if (bombAvailable) {
                 activateBomb();
                 bombAvailable = false;
