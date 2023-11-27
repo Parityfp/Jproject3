@@ -36,6 +36,7 @@ interface MyConstants
     static final String FILE_HIT     = RESOURCEPATH + "graze.wav";
     static final String FILE_BOMB     = RESOURCEPATH + "lazer01.wav";
     static final String FILE_READY     = RESOURCEPATH + "ok00.wav";
+    static final String FILE_TITLE     = RESOURCEPATH + "titlescreen.wav";
 
     //----- IMPORTANT
     static final String NON_SUSPICIOUS_LINK     = RESOURCEPATH + "https://www.youtube.com/watch?v=dQw4w9WgXcQ";
@@ -51,29 +52,44 @@ interface MyConstants
 //for handling audio
 class MySoundEffect
 {
-    private Clip         clip;
-    private FloatControl gainControl;         
-
-    public MySoundEffect(String filename)
-    {
-	try
-	{
-            java.io.File file = new java.io.File(filename);
-            AudioInputStream audioStream = AudioSystem.getAudioInputStream(file);
+private long lastSoundTime = 0;
+    private Clip clip;
+    private final long SOUND_COOLDOWN = 0; 
+    private boolean isClipPlaying = false;
+    public synchronized void SFX(String soundFileName, boolean loop, float volume) {
+        long currentTime = System.currentTimeMillis();
+        if (currentTime - lastSoundTime > SOUND_COOLDOWN && !isClipPlaying) {
+            lastSoundTime = currentTime;
+            try {
+            AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(getClass().getResource(soundFileName));
             clip = AudioSystem.getClip();
-            clip.open(audioStream);            
-            gainControl = (FloatControl)clip.getControl(FloatControl.Type.MASTER_GAIN);
-	}
-	catch (Exception e) { e.printStackTrace(); }
+            clip.open(audioInputStream);
+            setVolume(volume); 
+            clip.setMicrosecondPosition(0);
+            if (loop) {
+                isClipPlaying = true;
+                clip.loop(Clip.LOOP_CONTINUOUSLY);
+                clip.addLineListener(event -> {
+                    if (event.getType() == LineEvent.Type.STOP) {
+                        isClipPlaying = false;
+                    }
+                });
+
+            } else {
+                clip.start();
+            }
+
+        } catch (Exception e) {e.printStackTrace(); }
+        }
     }
-    public void playOnce()             { clip.setMicrosecondPosition(0); clip.start(); }
-    public void playLoop()             { clip.loop(Clip.LOOP_CONTINUOUSLY); }
-    public void stop()                 { clip.stop(); }
-    public void setVolume(float gain)
-    {
-        if (gain < 0.0f)  gain = 0.0f;
-        if (gain > 1.0f)  gain = 1.0f;
-        float dB = (float)(Math.log(gain) / Math.log(10.0) * 20.0);
+    public void setVolume(float volume) { // Volume is a value between 0 and 1
+    if (clip != null) {
+        FloatControl gainControl = (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
+
+        if (volume < 0.0f)  volume = 0.0f;
+        if (volume > 1.0f)  volume = 1.0f;
+        float dB = (float)(Math.log(volume) / Math.log(10.0) * 20.0);
         gainControl.setValue(dB);
     }
+}
 }

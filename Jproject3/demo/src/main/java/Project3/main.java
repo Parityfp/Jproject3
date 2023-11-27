@@ -3,6 +3,7 @@ package Project3;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import javax.sound.*;
 
 class StartMenu extends JFrame {
 
@@ -15,6 +16,7 @@ class StartMenu extends JFrame {
     private JPasswordField passwordField;
     private JButton creditsButton;
     private static String selectedDifficulty = "Lunatic"; 
+    private MySoundEffect title;
 
     public StartMenu() {
         requestFocus();
@@ -45,6 +47,8 @@ class StartMenu extends JFrame {
             }
         });
 
+        //audio
+        this.title = new MySoundEffect();
 
         // Username and Password
         JPanel authPanel = new JPanel(new GridLayout(3, 2));
@@ -109,12 +113,19 @@ class StartMenu extends JFrame {
             }
         });
 
-        setPreferredSize(new Dimension(700, 300));
+        setPreferredSize(new Dimension(getWidth() , getHeight() ));
 
         AddBackground();
 
         pack();
         setVisible(true);
+
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                title.SFX(MyConstants.FILE_TITLE, true, 0.5f);
+            }   
+        });
     }
 
     private void AddBackground() {
@@ -128,7 +139,7 @@ class StartMenu extends JFrame {
 
         drawpane.setBounds(0, 0, getWidth(), getHeight());
         contentPane.add(drawpane);
-        contentPane.setComponentZOrder(drawpane, Integer.MAX_VALUE); // Ensure the background is always at the back
+        contentPane.setComponentZOrder(drawpane, contentPane.getComponentCount() - 1);
     }
 
     private void showCredits() {

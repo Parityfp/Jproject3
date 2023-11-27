@@ -54,6 +54,7 @@ class game extends JPanel implements Runnable // implements KeyListener
     private BufferedImage image = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
     private ImageIcon bg;
     private Clip clip; 
+    private MySoundEffect shoot, hit, bomb, ready;
 
 
     private JLabel pointsLabel, bombsLabel, pauseLabel;
@@ -200,7 +201,7 @@ class game extends JPanel implements Runnable // implements KeyListener
     //bomb stuff
     private void activateBomb() {
         // Play bomb sound and gif
-        SFX(MyConstants.FILE_BOMB, false, 0.5f);
+        bomb.SFX(MyConstants.FILE_BOMB, false, 0.5f);
         //copy item generation technique from other method
         for (Enemy e : enemies) {
             int enemyType = 0;
@@ -247,6 +248,12 @@ class game extends JPanel implements Runnable // implements KeyListener
         //focuses on window instantly, no need to click on window to register key
         requestFocus();
         initDifficulty();
+
+        //audio
+        this.shoot = new MySoundEffect();
+        this.hit = new MySoundEffect();
+        this.bomb = new MySoundEffect();
+        this.ready = new MySoundEffect();
         //should make a method for this
         pointsLabel = new JLabel("0");
         pointsLabel.setForeground(Color.WHITE); 
@@ -306,48 +313,6 @@ class game extends JPanel implements Runnable // implements KeyListener
         };
 
     }
-
-    private long lastSoundTime = 0;
-    private final long SOUND_COOLDOWN = 0; 
-    private boolean isClipPlaying = false;
-    private synchronized void SFX(String soundFileName, boolean loop, float volume) {
-        long currentTime = System.currentTimeMillis();
-        if (currentTime - lastSoundTime > SOUND_COOLDOWN && !isClipPlaying) {
-            lastSoundTime = currentTime;
-            try {
-            AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(getClass().getResource(soundFileName));
-            clip = AudioSystem.getClip();
-            clip.open(audioInputStream);
-            setVolume(volume); 
-            clip.setMicrosecondPosition(0);
-            if (loop) {
-                isClipPlaying = true;
-                clip.loop(Clip.LOOP_CONTINUOUSLY);
-                clip.addLineListener(event -> {
-                    if (event.getType() == LineEvent.Type.STOP) {
-                        isClipPlaying = false;
-                    }
-                });
-
-            } else {
-                clip.start();
-            }
-
-        } catch (Exception e) {e.printStackTrace(); }
-        }
-    }
-    public void setVolume(float volume) { // Volume is a value between 0 and 1
-    if (clip != null) {
-        FloatControl gainControl = (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
-
-        if (volume < 0.0f)  volume = 0.0f;
-        if (volume > 1.0f)  volume = 1.0f;
-        float dB = (float)(Math.log(volume) / Math.log(10.0) * 20.0);
-        gainControl.setValue(dB);
-    }
-}
-
-
 
     //main method is only for testing here since we are launching the game through main.java
     public static void main(String args[]) {
@@ -441,7 +406,7 @@ class game extends JPanel implements Runnable // implements KeyListener
             
                 totalBulletsShot++;
                 //TODO make sound loop WORK
-                SFX(MyConstants.FILE_SHOOT, false, 0.2f);
+                shoot.SFX(MyConstants.FILE_SHOOT, false, 0.2f);
             }
             bulletCounter++;
         }
@@ -540,7 +505,7 @@ class game extends JPanel implements Runnable // implements KeyListener
         if (!bombAvailable) {
             bombTimer++;
             if (bombTimer >= bombTimerThreshold - 1) {
-                SFX(MyConstants.FILE_READY, false, 0.5f);
+                ready.SFX(MyConstants.FILE_READY, false, 0.5f);
             }
             if (bombTimer >= bombTimerThreshold) {
                 bombAvailable = true;
@@ -574,7 +539,7 @@ class game extends JPanel implements Runnable // implements KeyListener
                     // Handle collision between bullet and enemy
                     // Remove the enemy and the bullet, or mark them for removal
                     //System.out.println("enemy hit");
-                    SFX(MyConstants.FILE_HIT, false, 0.3f);
+                    hit.SFX(MyConstants.FILE_HIT, false, 0.3f);
                 }
             }
         } 
