@@ -310,7 +310,7 @@ class game extends JPanel implements Runnable // implements KeyListener
 
 
     private long lastSoundTime = 0;
-    private final long SOUND_COOLDOWN = 160; 
+    private final long SOUND_COOLDOWN = 0; 
     private boolean isClipPlaying = false;
     private synchronized void SFX(String soundFileName, boolean loop) {
         long currentTime = System.currentTimeMillis();
