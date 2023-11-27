@@ -19,8 +19,10 @@ interface MyConstants
     static final String FILE_BG3     = RESOURCEPATH + "backGround1.gif";
     static final String FILE_ALIEN1     = RESOURCEPATH + "tf.png";
     static final String FILE_ALIEN2     = RESOURCEPATH + "whitewoman.png";
+    static final String FILE_BOSS     = RESOURCEPATH + "kururing.gif";
     static final String FILE_ENEMYBULLET1     = RESOURCEPATH + "enemybullet.png";
     static final String FILE_ENEMYBULLET2     = RESOURCEPATH + "enemybullet2.png";
+    static final String FILE_PLASMA     = RESOURCEPATH + "redplasma.png";
 
 
 //////////////////////////////////// ITEMS ////////////////////////////////////

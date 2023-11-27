@@ -14,7 +14,7 @@ class StartMenu extends JFrame {
     private JTextField usernameField;
     private JPasswordField passwordField;
     private JButton creditsButton;
-    private static String selectedDifficulty = "Normal"; 
+    private static String selectedDifficulty = "Lunatic"; 
 
     public StartMenu() {
         requestFocus();
@@ -36,7 +36,7 @@ class StartMenu extends JFrame {
         JComboBox<String> difficultyComboBox = new JComboBox<>(difficulties);
         difficultyComboBox.setBounds(250, 20, 150, 30);
         contentPane.add(difficultyComboBox);
-        difficultyComboBox.setSelectedItem("Normal");
+        difficultyComboBox.setSelectedItem("Lunatic");
         difficultyComboBox.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {

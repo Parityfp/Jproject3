@@ -1,23 +1,37 @@
 package Project3;
 
-import java.awt.*;
-import java.awt.event.*;
-import java.awt.image.BufferStrategy;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Rectangle;
+import java.awt.Toolkit;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Random;
 
 import javax.imageio.ImageIO;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
 import javax.sound.sampled.LineEvent;
-import javax.sound.sampled.LineUnavailableException;
-import javax.sound.sampled.UnsupportedAudioFileException;
-import javax.swing.*;
-import java.util.List;
-import java.util.Random;
-import java.util.Iterator;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 
 //TODO arraylist for sounds
 class game extends JPanel implements Runnable // implements KeyListener
@@ -61,6 +75,18 @@ class game extends JPanel implements Runnable // implements KeyListener
     private final int bulletThreshold = 5; // rate of the player's bullet
     private int totalBulletsShot = 0;
 
+
+    //stolen variables from magnet
+    private double pspawnX; // Spawn at the left edge of the screen
+    private double pspawnY; // Random Y position or a specific pattern
+    private double pspeed = 2;
+    private double pdx = 1.0;
+    private double pdy;
+    private int plasmaThreshold = 3;
+    private int plasmacount;
+
+    
+
     //same thing for items
     private List<item> items = new ArrayList<>();
     private int bombTimer = 0;
@@ -71,7 +97,6 @@ class game extends JPanel implements Runnable // implements KeyListener
 
     //same thing for enemies
     private List<Enemy> enemies = new ArrayList<>();
-    private List<shootingEnemy> shootingEnemies;
     private int enemySpawnCounter = 0;
     //this should be the main difficulty parameter
     private int enemySpawnThreshold = 30; 
@@ -82,7 +107,7 @@ class game extends JPanel implements Runnable // implements KeyListener
         Enemy newEnemy;
         switch (enemyType) {
             case "shootingEnemy":
-                newEnemy = new shootingEnemy(x, y, bullets);
+                newEnemy = new shootingEnemy(this, x, y, bullets);
                 switch (this.difficulty) {
                     case "Baby":
                         ((shootingEnemy) newEnemy).setshootCooldown(200);
@@ -116,7 +141,7 @@ class game extends JPanel implements Runnable // implements KeyListener
                 }
                 break;
             default:
-                newEnemy = new DefaultEnemy(x, y);
+                newEnemy = new DefaultEnemy(this, x, y);
                 break;
         }
         enemies.add(newEnemy);
@@ -290,8 +315,11 @@ class game extends JPanel implements Runnable // implements KeyListener
 
     //main method is only for testing here since we are launching the game through main.java
     public static void main(String args[]) {
-        game game = new game("Baby");
+        game game = new game("Lunatic");
+        MouseInput mouseInput = new MouseInput(game);
         game.addKeyListener(new KeyInput(game));
+        game.addMouseListener(mouseInput);
+        game.addMouseMotionListener(mouseInput);
 
 
         game.setPreferredSize(new Dimension(WIDTH, HEIGHT));
@@ -370,7 +398,7 @@ class game extends JPanel implements Runnable // implements KeyListener
                         double angle = spreadAngle * (i - p.getUpgrades());
                         double dx = Math.sin(angle);
                         double dy = -Math.cos(angle);
-                        bullets.add(new playerBullet(p.getX(), p.getY(), 10.0, dx, dy, false));
+                        bullets.add(new playerBullet(this, p.getX(), p.getY(), 10.0, dx, dy, false));
                     }
                 }
             
@@ -398,16 +426,42 @@ class game extends JPanel implements Runnable // implements KeyListener
         if (!shootingEnemyActive) {
             shootingEnemyTimer++;
         }
+        //indicates when enemies should stop spawning, for bosses or special events, number divides by 60 for time in secondsd
         
-        if (enemySpawnCounter >= enemySpawnThreshold) {
-            addEnemy(new Random().nextDouble() * (WIDTH - 50), 0, "DefaultEnemy"); // Example: spawn at a random x position at the top
-            if (!shootingEnemyActive && shootingEnemyTimer >= shootingEnemyCooldown) {
-                addEnemy(new Random().nextDouble() * (WIDTH - 50), 0, "shootingEnemy");
-                shootingEnemyActive = true;
-                shootingEnemyTimer = 0;
+        if(gameTickCounter < 1200){
+            if (enemySpawnCounter >= enemySpawnThreshold) {
+                addEnemy(new Random().nextDouble() * (WIDTH - 50), 0, "DefaultEnemy"); // Example: spawn at a random x position at the top
+                if (!shootingEnemyActive && shootingEnemyTimer >= shootingEnemyCooldown) {
+                    addEnemy(new Random().nextDouble() * (WIDTH - 50), 0, "shootingEnemy");
+                    shootingEnemyActive = true;
+                    shootingEnemyTimer = 0;
+                }
+                enemySpawnCounter = 0;
             }
-    
-            enemySpawnCounter = 0;
+        }
+
+        //every second, adjust plasma spawn rate here. use prime numbers for main delay
+        //added break time for player to clear enemies (5 seconds)
+        if (gameTickCounter > 1500 && gameTickCounter % 60 == 0 && plasmacount < plasmaThreshold ) {
+            //shoot();
+            //random position for plasma bullets
+            if(Math.random() < 0.5){
+                pspawnX = 350;
+                pdx = -pdx;
+            }else{
+                pspawnX = WIDTH - 350 -128;
+                pdx = -pdx;
+            }
+            pdy = pdx;
+            pspawnY = 50 + (Math.random() * 350);
+            plasma plasmaBullet = new plasma(this, pspawnX, pspawnY, pspeed, pdx, pdy, true);
+            bullets.add(plasmaBullet);
+            plasmacount++;
+        } 
+        for (Bullet p : bullets) if (p instanceof plasma) p.attractToPlayer();
+        for (Bullet p : bullets) {
+            if (p instanceof plasma) break;
+            plasmacount = 0;
         }
 
         // Update and remove enemies
@@ -453,11 +507,21 @@ class game extends JPanel implements Runnable // implements KeyListener
 
 
         //collision handling
+        for (Bullet b : bullets) {
+                if (b.isEnemyBullet && p.getBounds().intersects(b.getBounds())) {
+                    System.out.println("player hit by enemy bullet, GAME OVER");
+                    //SwingUtilities.invokeLater(this::showGameOverScreen);
+                    running = false;
+                    return;
+                }
+            }
+
         for (Enemy e : enemies) {
             if (p.getBounds().intersects(e.getBounds())) {
                 // Handle collision between player and enemy
                 System.out.println("player hit, GAME OVER");
-                running = false;
+                running = false; //try to quit game, maybe change this when implementing retry button.
+                SwingUtilities.invokeLater(this::showGameOverScreen);
                 return;
             }
     
@@ -468,13 +532,10 @@ class game extends JPanel implements Runnable // implements KeyListener
                     //System.out.println("enemy hit");
                     SFX(MyConstants.FILE_HIT, false);
                 }
-                if (b.isEnemyBullet && p.getBounds().intersects(b.getBounds())) {
-                    System.out.println("player hit by enemy bullet, GAME OVER");
-                    running = false;
-                    return;
-                }
             }
         } 
+
+
 
         for (int i = bullets.size() - 1; i >= 0; i--) {
             Bullet b = bullets.get(i);
@@ -519,12 +580,12 @@ class game extends JPanel implements Runnable // implements KeyListener
                 // Increase player's points, can add if or case statement for how much to increase depending on the enmemy type
                 switch (it.getEnemyType()) {
                     case 0:
-                        p.addPoints(1000);
+                        p.addPoints(1500);
                         pointsLabel.setText("" + p.getPoints());
                         System.out.println(it.getEnemyType());
                         break;
                     case 1:
-                        p.addPoints(10000);
+                        p.addPoints(500);
                         pointsLabel.setText("" + p.getPoints());
                         break;
                     default:
@@ -548,10 +609,13 @@ class game extends JPanel implements Runnable // implements KeyListener
     
     }
 
+    //render
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
     
+        //if statement if tick at 1 so
+
         // Draw the background image
         g.drawImage(image, 0, 0, getWidth(), getHeight(), this);
 
@@ -593,8 +657,40 @@ class game extends JPanel implements Runnable // implements KeyListener
     private boolean leftPressed = false;
     private boolean upPressed = false;
     private boolean downPressed = false;
+    private boolean isDragging = false;
+    private Bullet selectedBullet;
+    //store the offset since p.getX,Y() gives the XY of the top left corner.
+    private int offsetX, offsetY;
 
+    public boolean getDragging(){
+        return isDragging;
+    }
 
+    public void mousePressed(MouseEvent e){
+        for (Bullet p : bullets) {    
+            if (p instanceof plasma && p.getBounds().contains(e.getPoint())) {
+                selectedBullet = p;
+                isDragging = true;
+                offsetX = e.getX() - (int)p.getX();
+                offsetY = e.getY() - (int)p.getY();
+
+                System.out.println("clicked on plasma");
+                break; //only first plasma that gets clicked
+            }
+        }
+    }
+    public void mouseReleased(MouseEvent e){
+        isDragging = false;
+        selectedBullet = null;
+        System.out.println("Released");
+    }
+    public void mouseDragged(MouseEvent e){
+        if (isDragging && selectedBullet != null) {
+            System.out.println("dragging" + e.getX() + ", " + e.getY());
+            selectedBullet.setX(e.getX() - offsetX);
+            selectedBullet.setY(e.getY() - offsetY);
+        }
+    }
     public void keyPressed(KeyEvent e){
         int key = e.getKeyCode();
 
@@ -669,8 +765,32 @@ class game extends JPanel implements Runnable // implements KeyListener
             p.setVelY(0);
         }
     }
-}
 
+    //GAME OVER SCREEN//
+    public void showGameOverScreen() {
+        JFrame gameOverFrame = new JFrame("Game Over");
+        gameOverFrame.setSize(300, 200);
+        gameOverFrame.setLayout(new BorderLayout());
+        gameOverFrame.setLocationRelativeTo(null); // Center on screen
+        String gameOverText = "<html>Game Over<br/>Score: " + p.getPoints() + "</html>";
+    
+        JLabel gameOverLabel = new JLabel(gameOverText, SwingConstants.CENTER);
+        gameOverLabel.setFont(new Font("Arial", Font.BOLD, 24));
+    
+        JButton restartButton = new JButton("Back to Start Menu");
+        restartButton.addActionListener(e -> {
+            gameOverFrame.dispose(); // Close the Game Over screen
+            new StartMenu().setVisible(true); // Show the Start Menu
+        });
+    
+        gameOverFrame.add(gameOverLabel, BorderLayout.CENTER);
+        gameOverFrame.add(restartButton, BorderLayout.SOUTH);
+        gameOverFrame.setVisible(true); 
+        //SwingUtilities.getWindowAncestor(this).dispose();
+        SwingUtilities.getWindowAncestor(this).setVisible(false);
+    
+    }
+}
 
 
 //////////////////////////////////// PLAYER CLASS ////////////////////////////////////
@@ -757,8 +877,10 @@ abstract class Enemy {
     protected int hitCount = 1;
     protected boolean destroyed = false;
     protected List<Bullet> bulletList;
+    game gameinstance;
 
-    public Enemy(double x, double y) {
+    public Enemy(game game, double x, double y) {
+        this.gameinstance = game;
         this.x = x;
         this.y = y;
         // Common initialization
@@ -804,8 +926,8 @@ class DefaultEnemy extends Enemy {
     private double frequency = 0.02;
     private int hitThreshold = 5; 
 
-    public DefaultEnemy(double x, double y) {
-        super(x, y);
+    public DefaultEnemy(game gameInstance, double x, double y) {
+        super(gameInstance, x, y);
         initialX = x;
         // Load specific image for this enemy type
         try {
@@ -851,8 +973,8 @@ class shootingEnemy extends Enemy{
     private double startAngle = Math.PI / 2 - spreadAngle / 2;
 
 
-    public shootingEnemy(double x, double y, List<Bullet> bulletList) {
-        super(x, y);
+    public shootingEnemy(game gameInstance, double x, double y, List<Bullet> bulletList) {
+        super(gameInstance, x, y);
         this.bulletList = bulletList;
         try {
             enemyImage = ImageIO.read(getClass().getResource(MyConstants.FILE_ALIEN2));
@@ -898,12 +1020,12 @@ class shootingEnemy extends Enemy{
 
     private void shoot() {
 
-    System.out.println("Shooting Bullets:");
+    System.out.println("enemy Shooting Bullets");
     for (int i = 0; i < numberOfBullets; i++) {
         double angle = startAngle + i * (spreadAngle / (numberOfBullets - 1));
         double dx = Math.cos(angle);
         double dy = Math.sin(angle);
-        Bullet newBullet = new enemyBullet(x, y, bulletSpeed, dx, dy);
+        Bullet newBullet = new enemyBullet(gameinstance, x, y, bulletSpeed, dx, dy, true);
         bulletList.add(newBullet);
 
         //System.out.println("Bullet " + (i + 1) + ": Angle = " + angle + ", dx = " + dx + ", dy = " + dy);
@@ -926,8 +1048,11 @@ abstract class Bullet {
     protected double speed = 15.0;
     protected BufferedImage bullet;
     protected boolean isEnemyBullet;
+    protected boolean magnet = false;
+    protected game gameInstance;
 
-    public Bullet(double x, double y, double speed, double dx, double dy, boolean isEnemyBullet) {
+    public Bullet(game game, double x, double y, double speed, double dx, double dy, boolean isEnemyBullet) {
+        this.gameInstance = game;
         this.x = x;
         this.y = y;
         this.speed = speed;
@@ -945,9 +1070,35 @@ abstract class Bullet {
     }
 
     public void tick() {
-        y -= speed; // Moves the bullet upwards
-        x += dx * speed;
-        y += dy * speed;
+        
+
+        if (magnet) {
+            double playerX = gameInstance.getPlayerX();
+            double playerY = gameInstance.getPlayerY();
+            double speed = this.speed;
+
+            double deltaX = playerX - x;
+            double deltaY = playerY - y;
+            double distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+            if (distance > 1) { // Prevent division by zero
+                double directionX = deltaX / distance;
+                double directionY = deltaY / distance;
+
+                x += directionX * speed;
+                y += directionY * speed;
+            }
+            //bounds
+            if (x <= 0 + 350 && x >= 0) x = 0 + 342;
+            if (x >= ((1366 - 350) - 120) && x <= 1366) x = (1366 - 350) - 120;
+            if (y <= 0 + 42) y = 0 + 42;
+            if (y >= 768 - 50 - 120) y = 768 - 50 - 120;
+        } else{
+            //y -= speed; // Moves the bullet upwards
+            x += dx * speed;
+            y += dy * speed;
+        }
+
+        
     }
 
     public void render(Graphics g) {
@@ -965,6 +1116,15 @@ abstract class Bullet {
             e.printStackTrace();
         }
     }
+
+    public void attractToPlayer() {
+        this.magnet = true;
+    }
+
+    public void setX(double x){this.x = x;}
+    public void setY(double y){this.y = y;}
+    public double getX(){return this.x ;}
+    public double getY(){return this.y ;}
 }
 
 class playerBullet extends Bullet{
@@ -973,27 +1133,46 @@ class playerBullet extends Bullet{
         super(x, y);
         setBulletImage(MyConstants.FILE_BULLET); 
     }
-    public playerBullet(double x, double y, double speed, double dx, double dy, boolean isEnemyBullet) {
-        super(x, y, speed, dx, dy, isEnemyBullet);
+    public playerBullet(game gameInstance, double x, double y, double speed, double dx, double dy, boolean isEnemyBullet) {
+        super(gameInstance , x, y, speed, dx, dy, isEnemyBullet);
         setBulletImage(MyConstants.FILE_BULLET); 
     }
-
+    @Override
+    public void tick(){
+        y-=speed;
+    }
+    
 }
-
 
 class enemyBullet extends Bullet{
 
-    public enemyBullet(double x, double y, double speed, double dx, double dy) {
-        super(x, y, speed, dx, dy, true);
+    public enemyBullet(game gameInstance, double x, double y, double speed, double dx, double dy, boolean isEnemyBullet) {
+        super(gameInstance, x, y, speed, dx, dy, isEnemyBullet);
         setBulletImage(MyConstants.FILE_ENEMYBULLET2); 
     }
 
+
     @Override
-    public void tick() {
-        x += dx * speed;
-        y += dy * speed;
-        //System.out.println("Bullet moving to x: " + x + ", y: " + y);
+    public boolean isOffScreen() {
+        return y > game.HEIGHT - 50 || y < 0 + 50 || x < 0 + 350 || x > game.WIDTH - 350 -120;
     }
+}
+
+class plasma extends enemyBullet{
+    public plasma(game gameInstance, double x, double y, double speed, double dx, double dy, boolean isEnemyBullet) {
+        super(gameInstance, x, y, speed, dx, dy, isEnemyBullet);
+        setBulletImage(MyConstants.FILE_PLASMA); 
+    }
+
+    @Override
+    public Rectangle getBounds() {
+        return new Rectangle((int)x, (int)y, bullet.getWidth()-38, bullet.getHeight()-38);
+    }
+    @Override
+    public boolean isOffScreen() {
+        return y > game.HEIGHT|| y < 0 || x < 0 || x > game.WIDTH;
+    }
+
 }
 
 //////////////////////////////////// ITEM CLASS ////////////////////////////////////
@@ -1088,7 +1267,7 @@ class star extends item{
 
 }
 
-//////////////////////////////////// KEYINPUT CLASS ////////////////////////////////////
+//////////////////////////////////// INPUT CLASS ////////////////////////////////////
 
 class KeyInput extends KeyAdapter {
 
@@ -1103,5 +1282,22 @@ class KeyInput extends KeyAdapter {
     }
     public void keyReleased(KeyEvent e){
         game.keyReleased(e);
+    }
+    
+}
+
+class MouseInput extends MouseAdapter {
+    game game;
+    public MouseInput(game game){
+        this.game = game;
+    }
+    public void mousePressed(MouseEvent e){
+        game.mousePressed(e);
+    }
+    public void mouseReleased(MouseEvent e){
+        game.mouseReleased(e);
+    }
+    public void mouseDragged(MouseEvent e){
+        game.mouseDragged(e);
     }
 }
