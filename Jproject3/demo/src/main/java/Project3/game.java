@@ -54,9 +54,8 @@ class game extends JPanel implements Runnable // implements KeyListener
 
     private BufferedImage image = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
     private ImageIcon bg;
-    private Clip clip; 
     private MySoundEffect shoot, hit, bomb, ready, bling, collect, music, kurukuru;
-    private long pausePosition;
+
 
 
     public JLabel pointsLabel, bombsLabel, pauseLabel, timeLabel, hpLabel;
@@ -76,8 +75,6 @@ class game extends JPanel implements Runnable // implements KeyListener
     private boolean shooting = false;
     private int bulletCounter = 0;
     private int gameTickCounter = 0;
-
-    private Clip shootingClip;
 
     private final int bulletThreshold = 5; // rate of the player's bullet
     private int totalBulletsShot = 0;
@@ -432,14 +429,18 @@ class game extends JPanel implements Runnable // implements KeyListener
         p.tick();
         if(gameTickCounter == 1)music.SFX(MyConstants.FILE_THEME, true, 0.25f);//the volume level, try from 0-1
         gameTickCounter++;
-
+        System.out.println(bullets.size());
         timeLabel.setText("Time: " + gameTickCounter/60);
-        if (shooting) {
+
+        /////////////////// MAIN SHOOTING CONTROL ///////////////////
+        if (shooting  && !enemies.isEmpty()) {
+            Enemy targetEnemy;
             // adjust the rate as needed
             if (bulletCounter % bulletThreshold == 0) {
-                
+                targetEnemy = enemies.get(0); // Assuming there's always at least one enemy, change later TODO
                 if (p.getUpgrades() == 0) {
-                    bullets.add(new playerBullet(p.getX() + 9, p.getY()));
+                    bullets.add(new playerBullet(p.getX() + 9, p.getY(), targetEnemy));
+                    if(attracting) for (Bullet b : bullets)if (b.getAge() >= 5)b.attractToEnemy();
                 } else {
                     // Fire multiple bullets with spread
                     double spreadAngle = Math.toRadians(10); // Angle between each bullet
@@ -448,16 +449,20 @@ class game extends JPanel implements Runnable // implements KeyListener
                         double angle = spreadAngle * (i - p.getUpgrades());
                         double dx = Math.sin(angle);
                         double dy = -Math.cos(angle);
-                        bullets.add(new playerBullet(this, p.getX() + 9, p.getY() + 9, 10.0, dx, dy, false));
-                    }
+                        if (!enemies.isEmpty()) {
+                             
+                            bullets.add(new playerBullet(this, p.getX() + 9, p.getY() + 9, 10.0, dx, dy, false, targetEnemy));
+                        }
+                        if(attracting) for (Bullet b : bullets)if (b.getAge() >= 5)b.attractToEnemy();
+                    }                    
                 }
-            
                 totalBulletsShot++;
                 //TODO make sound loop WORK
                 shoot.SFX(MyConstants.FILE_SHOOT, false, 0.2f);
             }
             bulletCounter++;
         }
+        
     
         //handles on-screen bullets
         for (int i = 0; i < bullets.size(); i++) {
@@ -750,8 +755,9 @@ class game extends JPanel implements Runnable // implements KeyListener
     private boolean downPressed = false;
     private boolean isDragging = false;
     private Bullet selectedBullet;
-    //store the offset since p.getX,Y() gives the XY of the top left corner.
+    //store the offset since p.getX,Y() gives the XY of the top left corner. (for dragging projectile)
     private int offsetX, offsetY;
+    private boolean attracting;
 
     public boolean getDragging(){
         return isDragging;
@@ -820,6 +826,11 @@ class game extends JPanel implements Runnable // implements KeyListener
                 bombAvailable = false;
             }
         }
+
+        if (key == KeyEvent.VK_CONTROL) {
+            attracting = true;
+            //for (Bullet b : bullets)if (b.getAge() >= 5)b.attractToEnemy();
+        }
         updateVelocity();
 
     }
@@ -839,8 +850,10 @@ class game extends JPanel implements Runnable // implements KeyListener
         if (key == KeyEvent.VK_SPACE) {
             shooting = false;
         }
-    
-
+        if (key == KeyEvent.VK_CONTROL) {
+            attracting = false;
+            //for (Bullet b : bullets)if (b.getAge() >= 5)b.Unattract();
+        }
         updateVelocity();
     }
     private void updateVelocity() {
@@ -943,6 +956,8 @@ class game extends JPanel implements Runnable // implements KeyListener
         isPaused = false;
         pointsLabel.setText("");
         bombsLabel.setText("Bomb: "); 
+        starThreshold = 20000;
+        starThresholdIncrement = 80000;
         //removes all jpanel components, very important
         this.removeAll();
         SwingUtilities.invokeLater(() -> {
@@ -1255,7 +1270,7 @@ class Herta extends Enemy{
     }
     @Override
     public Rectangle getBounds() {
-        return new Rectangle((int)x, (int)y, enemyImage.getIconWidth() - 10, enemyImage.getIconHeight() - 10);
+        return new Rectangle((int)x, (int)y, enemyImage.getIconWidth() - 20, enemyImage.getIconHeight() - 10);
     }
     //detects when to destroy enemy (how many hits)
     @Override
@@ -1307,8 +1322,10 @@ abstract class Bullet {
     protected double speed = 15.0;
     protected BufferedImage bullet;
     protected boolean isEnemyBullet;
-    protected boolean magnet = false;
+    protected boolean magnet = false, enemymagnet = false;
     protected game gameInstance;
+    protected Enemy enemyInstance;
+    protected int age = 0;
 
     public Bullet(game game, double x, double y, double speed, double dx, double dy, boolean isEnemyBullet) {
         this.gameInstance = game;
@@ -1329,8 +1346,6 @@ abstract class Bullet {
     }
 
     public void tick() {
-        
-
         if (magnet) {
             double playerX = gameInstance.getPlayerX();
             double playerY = gameInstance.getPlayerY();
@@ -1338,6 +1353,7 @@ abstract class Bullet {
 
             double deltaX = playerX - x;
             double deltaY = playerY - y;
+            //pythagorus, calculate hypotenuse 
             double distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
             if (distance > 1) { // Prevent division by zero
                 double directionX = deltaX / distance;
@@ -1379,27 +1395,57 @@ abstract class Bullet {
     public void attractToPlayer() {
         this.magnet = true;
     }
+    public void attractToEnemy() {
+        this.enemymagnet = true;
+    }
+    public void Unattract() {
+        this.enemymagnet = false;
+    }
 
     public void setX(double x){this.x = x;}
     public void setY(double y){this.y = y;}
     public double getX(){return this.x ;}
     public double getY(){return this.y ;}
+    public double getAge(){return this.age ;}
 }
 
 class playerBullet extends Bullet{
 
-    public playerBullet(double x, double y) {
+    public playerBullet(double x, double y, Enemy enemyInstance) {
         super(x, y);
+        this.enemyInstance = enemyInstance;
         setBulletImage(MyConstants.FILE_BULLET); 
     }
-    public playerBullet(game gameInstance, double x, double y, double speed, double dx, double dy, boolean isEnemyBullet) {
+    public playerBullet(game gameInstance, double x, double y, double speed, double dx, double dy, boolean isEnemyBullet, Enemy enemyInstance) {
         super(gameInstance , x, y, speed, dx, dy, isEnemyBullet);
+        this.enemyInstance = enemyInstance;
         setBulletImage(MyConstants.FILE_BULLET); 
     }
     @Override
     public void tick(){
+        //y-=10;
+        this.age++;
+        if (enemymagnet){
+            // if(enemyInstance != null){
+                double enemyX = enemyInstance.getX();
+                double enemyY = enemyInstance.getY();
+                this.speed = 10;
+
+                double deltaX = enemyX - x;
+                double deltaY = enemyY - y;
+                //pythagorus, calculate hypotenuse 
+                double distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+                if (distance > 1) { // Prevent division by zero
+                    double directionX = deltaX / distance;
+                    //double directionY = deltaY / distance;
+                    x += directionX * speed;
+                    //y += directionY * speed;
+                }
+            
+            //}
+        }
+        y += -10;
         x += dx * speed;
-        y += dy * speed;
     }
 }
 
@@ -1461,6 +1507,7 @@ abstract class item{
 
             double deltaX = playerX - x;
             double deltaY = playerY - y;
+            //pythagorus, calculate hypotenuse 
             double distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
             if (distance > 1) { // Prevent division by zero
                 double directionX = deltaX / distance;
