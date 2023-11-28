@@ -891,14 +891,12 @@ class game extends JPanel implements Runnable // implements KeyListener
             gameOverFrame.dispose(); // Close the Game Over screen
             new StartMenu().setVisible(true); // Show the Start Menu
         });
-
         JButton retryButton = new JButton("Retry");
         retryButton.addActionListener(e -> {
             //SwingUtilities.getWindowAncestor(this).dispose();
             SwingUtilities.getWindowAncestor(this).setVisible(true);
             gameOverFrame.dispose(); // Close the Game Over screen
-            restartGame();
-            
+            restartGame();  
         });
         JButton exitButton = new JButton("Exit");
         exitButton.addActionListener(e -> {
@@ -928,7 +926,6 @@ class game extends JPanel implements Runnable // implements KeyListener
         //SwingUtilities.getWindowAncestor(this).dispose();
         music.stopSound();
         SwingUtilities.getWindowAncestor(this).setVisible(false);
-
     }
 
     private void restartGame() {
@@ -1025,7 +1022,6 @@ class player {
         if (x >= (1366 - 350) - 32) x = (1366 - 350) - 32;
         if (y <= 0 + 50) y = 0 + 50;
         if (y >= 766 - 50 - 32) y = 766 - 50 - 32;
-
     }
 
     public void render(Graphics g){
@@ -1046,7 +1042,6 @@ class player {
     public double getY() {
         return y;
     }
-
 }
 //////////////////////////////////// ENEMY CLASS ////////////////////////////////////
 
