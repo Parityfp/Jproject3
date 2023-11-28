@@ -77,6 +77,17 @@ class StartMenu extends JFrame {
                 showCredits();
             }
         });
+        //Guide button
+        guideButton = new JButton("Guide");
+        guideButton.setBounds(480, 180, 100, 30);
+        contentPane.add(guideButton);
+
+        guideButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                showGuide();
+            }
+        });
 
         // Create mute and unmute toggle buttons
         tb = new JToggleButton[2];
@@ -177,6 +188,53 @@ class StartMenu extends JFrame {
         creditsFrame.setLocationRelativeTo(null);
         creditsFrame.setVisible(true);
     }
+
+    private void showGuide() {
+        JFrame guideFrame = new JFrame("Guide");
+        guideFrame.setBounds(300, 300, 400, 200);
+        guideFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+
+        CardLayout cardLayout = new CardLayout();
+        JPanel cardPanel = new JPanel(cardLayout); 
+
+        addImagePanel(MyConstants.FILE_SLIDE1, cardPanel);
+        addImagePanel(MyConstants.FILE_SLIDE2, cardPanel);
+        addImagePanel(MyConstants.FILE_SLIDE3, cardPanel);
+        addImagePanel(MyConstants.FILE_SLIDE4, cardPanel);
+        addImagePanel(MyConstants.FILE_SLIDE5, cardPanel);
+        addImagePanel(MyConstants.FILE_SLIDE6, cardPanel);
+
+        JButton prevButton = new JButton("<<");
+        prevButton.addActionListener(e -> cardLayout.previous(cardPanel));
+
+        JButton nextButton = new JButton(">>");
+        nextButton.addActionListener(e -> cardLayout.next(cardPanel));
+
+        prevButton.setPreferredSize(new Dimension(500, 40));
+        nextButton.setPreferredSize(new Dimension(500, 40));
+
+
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.add(prevButton);
+        buttonPanel.add(nextButton);
+        guideFrame.add(buttonPanel);
+
+        guideFrame.setLayout(new BorderLayout());
+        guideFrame.add(cardPanel, BorderLayout.CENTER);
+        guideFrame.add(buttonPanel, BorderLayout.SOUTH); 
+
+        guideFrame.pack();
+        guideFrame.setLocationRelativeTo(null);
+        guideFrame.setVisible(true);
+    }
+
+    public void addImagePanel(String imagePath, JPanel cardPanel) {
+        JPanel panel = new JPanel();
+        JLabel label = new JLabel(new ImageIcon(getClass().getResource(imagePath)));
+        panel.add(label);
+        cardPanel.add(panel); 
+    }
+
 
     public static String getDifficulty(){
         return selectedDifficulty;

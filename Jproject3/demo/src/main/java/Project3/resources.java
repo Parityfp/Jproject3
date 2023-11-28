@@ -24,6 +24,13 @@ interface MyConstants
     static final String FILE_ENEMYBULLET2     = RESOURCEPATH + "enemybullet2.png";
     static final String FILE_PLASMA     = RESOURCEPATH + "redplasma.png";
 
+    static final String FILE_SLIDE1     = RESOURCEPATH + "mspaint1.png";
+    static final String FILE_SLIDE2     = RESOURCEPATH + "mspaint2.png";
+    static final String FILE_SLIDE3     = RESOURCEPATH + "mspaint3.png";
+    static final String FILE_SLIDE4     = RESOURCEPATH + "mspaint4.png";
+    static final String FILE_SLIDE5     = RESOURCEPATH + "mspaint5.png";
+    static final String FILE_SLIDE6     = RESOURCEPATH + "mspaint6.png";
+
 
 //////////////////////////////////// ITEMS ////////////////////////////////////
 
