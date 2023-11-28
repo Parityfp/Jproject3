@@ -5,7 +5,7 @@ import java.awt.*;
 import java.awt.event.*;
 import javax.sound.*;
 
-class StartMenu extends JFrame {
+class MainApplication extends JFrame {
 
     private JPanel contentPane;
     private StartButton startButton;
@@ -20,7 +20,7 @@ class StartMenu extends JFrame {
     private boolean mute = false;
     private JSlider volumeSlider;
 
-    public StartMenu() {
+    public MainApplication() {
         requestFocus();
         setTitle("Start Menu");
         setBounds(200, 200, 620, 400);
@@ -271,7 +271,7 @@ class StartMenu extends JFrame {
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-            new StartMenu();
+            new MainApplication();
         });
     }
 }
@@ -321,7 +321,7 @@ class StartButton extends JButton implements MouseListener {
     }
 
     public void mouseClicked(MouseEvent e) {
-        StartMenu.stoptitleSound();
+        MainApplication.stoptitleSound();
         title.SFX(MyConstants.FILE_OK, false, 0.7f);
         System.out.println("Game Started");
         // start game
@@ -329,7 +329,7 @@ class StartButton extends JButton implements MouseListener {
     }
 
     public void startGame() {
-        game gameInstance = new game(StartMenu.getDifficulty());
+        game gameInstance = new game(MainApplication.getDifficulty());
         gameInstance.addKeyListener(new KeyInput(gameInstance));
         MouseInput mouseInput = new MouseInput(gameInstance);
         gameInstance.addMouseListener(mouseInput);

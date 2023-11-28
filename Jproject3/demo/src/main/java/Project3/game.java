@@ -889,7 +889,7 @@ class game extends JPanel implements Runnable // implements KeyListener
         restartButton.addActionListener(e -> {
             SwingUtilities.getWindowAncestor(this).dispose();
             gameOverFrame.dispose(); // Close the Game Over screen
-            new StartMenu().setVisible(true); // Show the Start Menu
+            new MainApplication().setVisible(true); // Show the Start Menu
         });
         JButton retryButton = new JButton("Retry");
         retryButton.addActionListener(e -> {
