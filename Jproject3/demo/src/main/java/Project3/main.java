@@ -61,7 +61,7 @@ class MainApplication extends JFrame {
             }
         });
 
-        // audio
+        // Audio
         this.title = new MySoundEffect();
 
         // Volume slider
@@ -137,7 +137,20 @@ class MainApplication extends JFrame {
             }
         });
 
-        // Create mute and unmute toggle buttons
+        // Scoreboard button
+        scoresButton = new JButton("Scoreboard");
+        scoresButton.setBounds(490, 240, 100, 30);
+        contentPane.add(scoresButton);
+
+        scoresButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                showScoreboard();
+            }
+        });
+
+
+        // Mute and Unmute toggle buttons
         tb = new JToggleButton[2];
         tb[0] = new JRadioButton("Mute");
         tb[0].setName("Mute");
@@ -145,12 +158,10 @@ class MainApplication extends JFrame {
         tb[1].setName("Unmute");
         tb[1].setSelected(true);
 
-        // ensure cant deselect
         ButtonGroup buttonGroup = new ButtonGroup();
         buttonGroup.add(tb[0]);
         buttonGroup.add(tb[1]);
 
-        // Set positions and add buttons to the content pane
         tb[0].setBounds(50, 100, 100, 30);
         tb[1].setBounds(200, 100, 100, 30);
         contentPane.add(tb[0]);
@@ -198,7 +209,6 @@ class MainApplication extends JFrame {
         Image scaledImage = originalGif.getImage().getScaledInstance(getWidth(), getHeight(), Image.SCALE_DEFAULT);
         ImageIcon scaledGif = new ImageIcon(scaledImage);
         drawpane = new JLabel(scaledGif);
-        // drawpane.setIcon(backgroundImg);
         drawpane.setLayout(null);
 
         drawpane.setBounds(0, 0, getWidth(), getHeight());
@@ -365,10 +375,8 @@ class StartButton extends JButton implements MouseListener {
     private MySoundEffect title;
 
     public StartButton(game gameInstance) {
-        // Load image from the resources
         startImage = new ImageIcon(getClass().getResource("newStartButton.png"));
 
-        // Resize the image to fit the button
         Image scaledImage = startImage.getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH);
         startImage = new ImageIcon(scaledImage);
 
@@ -518,14 +526,3 @@ class scoreboard{
         }
     }
 }
-
-// class BufferedimageLoader{
-// private BufferedImage image;
-
-// public BufferedImage loadImage(String path) throws IOException{
-// image = ImageIO.read(getClass().getResource(path));
-// return image;
-
-// }
-
-// }
