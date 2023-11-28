@@ -8,12 +8,14 @@ import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
+import java.awt.Window;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.awt.event.WindowFocusListener;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -54,6 +56,7 @@ class game extends JPanel implements Runnable // implements KeyListener
     private ImageIcon bg;
     private Clip clip; 
     private MySoundEffect shoot, hit, bomb, ready, bling, collect, music, kurukuru;
+    private long pausePosition;
 
 
     private JLabel pointsLabel, bombsLabel, pauseLabel;
@@ -350,13 +353,32 @@ class game extends JPanel implements Runnable // implements KeyListener
                 System.exit(0);
             }
         });
+        frame.addWindowFocusListener(new WindowFocusListener() {
+            @Override
+            public void windowGainedFocus(WindowEvent e) {
+                System.out.println("Window gained focus");
+            }
+
+            @Override
+            public void windowLostFocus(WindowEvent e) {
+                System.out.println("Window lost focus");
+                game.togglePauseOnWindowLostFocus();
+            }
+        });
+
+
+
         game.start();
     }
     public game(String difficulty) {
         this.difficulty = difficulty;
     }
-
-
+    public void togglePauseOnWindowLostFocus() {
+        if(!isPaused)isPaused = !isPaused;
+        pauseLabel.setVisible(isPaused);
+        music.pauseSound();
+    }       
+    
     @Override
     public void run() {
         System.out.println("Run method started"); 
@@ -391,6 +413,7 @@ class game extends JPanel implements Runnable // implements KeyListener
         
     }
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////TICK
     private void tick() {
         if(isPaused)return;
         p.tick();
@@ -461,7 +484,7 @@ class game extends JPanel implements Runnable // implements KeyListener
         }
         
         System.out.println("Cycle tick" + currentCycleTick);
-        if (currentCycleTick > plasmaTimer + 120 && HertaSpawn <30) kurukuru.SFX(MyConstants.FILE_KURUKURU, false, 1f);
+        if (currentCycleTick == plasmaTimer + 120 && HertaSpawn <30) kurukuru.SFX(MyConstants.FILE_KURUKURU, false, 1f);
         if (currentCycleTick == cycleLength - 1) {  
             enemyHpMultiplier++;
             System.out.println("Cycle completed" + HertaSpawn);
@@ -661,7 +684,7 @@ class game extends JPanel implements Runnable // implements KeyListener
     
     }
 
-    //render
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////RENDER
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
@@ -769,8 +792,12 @@ class game extends JPanel implements Runnable // implements KeyListener
         }
 
         if (key == KeyEvent.VK_ESCAPE) {
+            if(isPaused)music.resume();
+            else music.pauseSound();
             isPaused = !isPaused;
             pauseLabel.setVisible(isPaused);
+            
+            
         }
 
         if (key == KeyEvent.VK_SHIFT) {
@@ -779,8 +806,6 @@ class game extends JPanel implements Runnable // implements KeyListener
                 bombAvailable = false;
             }
         }
-    
-    
         updateVelocity();
 
     }
@@ -901,8 +926,11 @@ class game extends JPanel implements Runnable // implements KeyListener
         shooting = false;
         bombTimer = 0;
         bombAvailable = false;
+        isPaused = false;
         pointsLabel.setText("");
         bombsLabel.setText("Bomb: "); 
+        //removes all jpanel components, very important
+        this.removeAll();
         SwingUtilities.invokeLater(() -> {
             init();
             start();

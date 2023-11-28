@@ -60,6 +60,7 @@ class MySoundEffect
 private long lastSoundTime = 0;
     private Clip clip;
     private final long SOUND_COOLDOWN = 10; 
+    private long PausePosition; 
     private boolean isClipPlaying = false;
     public synchronized void SFX(String soundFileName, boolean loop, float volume) {
         long currentTime = System.currentTimeMillis();
@@ -98,11 +99,30 @@ private long lastSoundTime = 0;
         }
     }
     public synchronized void stopSound() {
-    if (clip != null) {
-        clip.stop();
-        clip.setMicrosecondPosition(0); 
-        isClipPlaying = false;
+        if (clip != null) {
+            clip.stop();
+            clip.setMicrosecondPosition(0); 
+            isClipPlaying = false;
+        }
     }
-}
+    public synchronized void pauseSound() {
+        if (clip != null && clip.isRunning()) {
+            PausePosition = clip.getMicrosecondPosition(); 
+            clip.stop();
+            isClipPlaying = false;
+        }
+    }
+    public void resume() {
+        if (clip != null && !clip.isRunning()) {
+            clip.setMicrosecondPosition(PausePosition);
+            clip.start();
+        }
+    }
+    //dk if this is utilized
+    // public synchronized void setPositon(long position) {
+    //     if (clip != null) {
+    //         clip.setMicrosecondPosition(position); 
+    //     }
+    // }
 
 }

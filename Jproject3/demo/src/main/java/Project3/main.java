@@ -254,6 +254,18 @@ class StartButton extends JButton implements MouseListener {
         gameFrame.pack();
         gameFrame.setLocationRelativeTo(null);
         gameFrame.setVisible(true);
+        gameFrame.addWindowFocusListener(new WindowFocusListener() {
+            @Override
+            public void windowGainedFocus(WindowEvent e) {
+                System.out.println("Window gained focus");
+            }
+
+            @Override
+            public void windowLostFocus(WindowEvent e) {
+                System.out.println("Window lost focus");
+                gameInstance.togglePauseOnWindowLostFocus();
+            }
+        });
 
         gameInstance.start();
         // startmenu disappear
