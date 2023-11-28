@@ -17,6 +17,7 @@ class StartMenu extends JFrame {
     private JButton creditsButton, guideButton;
     private static String selectedDifficulty = "Lunatic"; 
     private static MySoundEffect title;
+    private boolean mute = false;
 
     public StartMenu() {
         requestFocus();
@@ -83,7 +84,7 @@ class StartMenu extends JFrame {
         tb[0].setName("Mute");
         tb[1] = new JRadioButton("Unmute");
         tb[1].setName("Unmute");
-        tb[0].setSelected(true);
+        tb[1].setSelected(true);
 
         // ensure cant deselect
         ButtonGroup buttonGroup = new ButtonGroup();
@@ -102,6 +103,8 @@ class StartMenu extends JFrame {
                 if (e.getStateChange() == ItemEvent.SELECTED) {
                     tb[1].setSelected(false); // Deselect the other button
                 }
+                mute = true;
+                title.pauseSound();
             }
         });
 
@@ -111,6 +114,8 @@ class StartMenu extends JFrame {
                 if (e.getStateChange() == ItemEvent.SELECTED) {
                     tb[0].setSelected(false); // Deselect the other button
                 }
+                mute = false;
+                title.resume();
             }
         });
 
