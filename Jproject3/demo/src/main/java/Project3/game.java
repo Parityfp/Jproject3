@@ -8,7 +8,6 @@ import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
-import java.awt.Window;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
@@ -24,17 +23,13 @@ import java.util.List;
 import java.util.Random;
 
 import javax.imageio.ImageIO;
-import javax.sound.sampled.Clip;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JSlider;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 
 class game extends JPanel implements Runnable
 {
@@ -44,7 +39,7 @@ class game extends JPanel implements Runnable
     //Game is at 766 instead of 768, im sorry.
     public static final int HEIGHT = 768;
     public static String TITLE = "game";
-    private String difficulty;
+    private String difficulty, username, password;
 
 
     private boolean running = false;
@@ -336,7 +331,7 @@ class game extends JPanel implements Runnable
 
     //main method is only for testing here since we are launching the game through main.java
     public static void main(String args[]) {
-        game game = new game("Lunatic");
+        game game = new game("Lunatic", "parityfp", "no");
         MouseInput mouseInput = new MouseInput(game);
         game.addKeyListener(new KeyInput(game));
         game.addMouseListener(mouseInput);
@@ -376,8 +371,10 @@ class game extends JPanel implements Runnable
 
         game.start();
     }
-    public game(String difficulty) {
+    public game(String difficulty, String username, String password) {
         this.difficulty = difficulty;
+        this.username = username;
+        this.password = password;
     }
     public void togglePauseOnWindowLostFocus() {
         if(!isPaused)isPaused = !isPaused;
@@ -909,6 +906,8 @@ class game extends JPanel implements Runnable
 
         gameOverFrame.setVisible(true); 
         //SwingUtilities.getWindowAncestor(this).dispose();
+        if(!password.isEmpty() && p.getPoints() > 0)scoreboard.saveScores(username, p.getPoints(), password);
+        if(password.isEmpty() && username.isEmpty() && p.getPoints() > 0) scoreboard.saveScores("Guest", p.getPoints(), "hackermans");
         music.stopSound();
         SwingUtilities.getWindowAncestor(this).setVisible(false);
     }
