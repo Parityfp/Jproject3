@@ -163,26 +163,38 @@ class StartMenu extends JFrame {
         JFrame creditsFrame = new JFrame("Credits");
         creditsFrame.setBounds(300, 300, 400, 200);
         creditsFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        creditsFrame.setLayout(new GridLayout(3, 1));
+        creditsFrame.setLayout(new GridLayout(6, 1));
 
         int fontSize = 18;
 
         JLabel nameLabel1 = new JLabel(" Frank Piyawat Davies 6480255 ");
-        Font customFont1 = new Font("Times New Roman", Font.BOLD, fontSize); 
-        nameLabel1.setFont(customFont1);
+        nameLabel1.setHorizontalAlignment(SwingConstants.CENTER);
+        nameLabel1.setFont(new Font("Times New Roman", Font.BOLD, fontSize));
 
         JLabel nameLabel2 = new JLabel(" Jitsopin Kanthaulis 6480376 ");
-        Font customFont2 = new Font("Times New Roman", Font.BOLD, fontSize); 
-        nameLabel2.setFont(customFont2);
+        nameLabel2.setHorizontalAlignment(SwingConstants.CENTER);
+        nameLabel2.setFont(new Font("Times New Roman", Font.BOLD, fontSize));
 
         JLabel nameLabel3 = new JLabel(" Chanakan Boonchoo 6580128 ");
-        Font customFont3 = new Font("Times New Roman", Font.BOLD, fontSize); 
-        nameLabel3.setFont(customFont3);
+        nameLabel3.setHorizontalAlignment(SwingConstants.CENTER);
+        nameLabel3.setFont(new Font("Times New Roman", Font.BOLD, fontSize));
+
+        JLabel nameLabel5 = new JLabel(" ~~ ASSETS ~~ ");
+        JLabel nameLabel6 = new JLabel(" Touhou 6, 8, 15 ; HoloCure ");
+        JLabel nameLabel7 = new JLabel(" Honkai: Star Rail ; Umineko ");
+        nameLabel6.setHorizontalAlignment(SwingConstants.CENTER);
+        nameLabel5.setHorizontalAlignment(SwingConstants.CENTER);
+        nameLabel7.setHorizontalAlignment(SwingConstants.CENTER);
+        nameLabel5.setFont(new Font("Times New Roman", Font.BOLD, fontSize));
+        nameLabel6.setFont(new Font("Times New Roman", Font.BOLD, fontSize));
+        nameLabel7.setFont(new Font("Times New Roman", Font.BOLD, fontSize));
 
         creditsFrame.add(nameLabel1);
         creditsFrame.add(nameLabel2);
         creditsFrame.add(nameLabel3);
-
+        creditsFrame.add(nameLabel5);
+        creditsFrame.add(nameLabel6);
+        creditsFrame.add(nameLabel7);
 
         creditsFrame.pack();
         creditsFrame.setLocationRelativeTo(null);
