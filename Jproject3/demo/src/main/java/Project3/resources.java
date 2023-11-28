@@ -75,12 +75,6 @@ private long lastSoundTime = 0;
             if (loop) {
                 isClipPlaying = true;
                 clip.loop(Clip.LOOP_CONTINUOUSLY);
-                clip.addLineListener(event -> {
-                    if (event.getType() == LineEvent.Type.STOP) {
-                        isClipPlaying = false;
-                    }
-                });
-
             } else {
                 clip.start();
             }
