@@ -7,6 +7,9 @@ import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Scanner;
@@ -20,9 +23,9 @@ class MainApplication extends JFrame {
     private JToggleButton[] tb;
     private JLabel drawpane;
     private ImageIcon backgroundImg;
-    private JTextField usernameField;
-    private JPasswordField passwordField;
-    private JButton creditsButton, guideButton;
+    private static JTextField usernameField;
+    private static JPasswordField passwordField;
+    private JButton creditsButton, guideButton, scoresButton;
     private static String selectedDifficulty = "Lunatic";
     private static MySoundEffect title;
     private boolean mute = false;
@@ -93,6 +96,8 @@ class MainApplication extends JFrame {
         passwordField = new JPasswordField();
         authPanel.add(passwordField);
 
+        
+
         authPanel.setBounds(-30, 150, 300, 100);
         contentPane.add(authPanel);
         authPanel.setOpaque(false);
@@ -117,6 +122,18 @@ class MainApplication extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 showGuide();
+            }
+        });
+
+        // Scoreboard button
+        scoresButton = new JButton("Scoreboard");
+        scoresButton.setBounds(490, 240, 100, 30);
+        contentPane.add(scoresButton);
+
+        scoresButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                showScoreboard();
             }
         });
 
@@ -236,6 +253,36 @@ class MainApplication extends JFrame {
         creditsFrame.setVisible(true);
     }
 
+    private void showScoreboard() {
+        JFrame scoreFrame = new JFrame("Scoreboard");
+        scoreFrame.setBounds(400, 400, 400, 200);
+        scoreFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+
+
+
+        JPanel scorePanel = new JPanel();
+        scorePanel.setLayout(new BoxLayout(scorePanel, BoxLayout.Y_AXIS));
+        JScrollPane scrollPane = new JScrollPane(scorePanel);
+        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        scoreFrame.add(scrollPane, BorderLayout.CENTER);
+
+        
+
+        scoreboard sb = new scoreboard();
+        ArrayList<playername> players = sb.getAllPlayers();
+        for (playername player : players) {
+            JLabel playerLabel = new JLabel(player.toString());
+            scorePanel.add(playerLabel); 
+            System.out.println(player.toString());
+            System.out.println("player.toString()");
+        }
+        
+
+        scoreFrame.pack(); 
+        scoreFrame.setLocationRelativeTo(null);
+        scoreFrame.setVisible(true); 
+    }
+
     private void showGuide() {
         JFrame guideFrame = new JFrame("Guide");
         guideFrame.setBounds(300, 300, 400, 200);
@@ -295,10 +342,16 @@ class MainApplication extends JFrame {
             new MainApplication();
         });
         scoreboard sb = new scoreboard();
-        for (player p : sb.getAllPlayers()) {
+        for (playername p : sb.getAllPlayers()) {
             System.out.println(p); // Assuming player class has a meaningful toString() method
         }
+    }
 
+    public static String getUsername() {
+        return usernameField.getText();
+    }
+    public static String getPassword() {
+        return passwordField.getText();
     }
 }
 
@@ -355,7 +408,7 @@ class StartButton extends JButton implements MouseListener {
     }
 
     public void startGame() {
-        game gameInstance = new game(MainApplication.getDifficulty());
+        game gameInstance = new game(MainApplication.getDifficulty(), MainApplication.getUsername(), MainApplication.getPassword());
         gameInstance.addKeyListener(new KeyInput(gameInstance));
         MouseInput mouseInput = new MouseInput(gameInstance);
         gameInstance.addMouseListener(mouseInput);
@@ -392,34 +445,35 @@ class StartButton extends JButton implements MouseListener {
 /////////////////Scoreboard 
 
 
-class player implements Comparable<player> {
+class playername implements Comparable<playername> {
     private String name;
     private int score;
     private String password;
 
-    public player(String name, int score, String password){
+    public playername(String name, int score, String password){
         this.name = name;
         this.score = score;
         this.password = password;
     }
 
     @Override
-    public int compareTo(player other) {
-        return Integer.compare(this.score, other.score);
+    public int compareTo(playername other) {
+        return Integer.compare(other.score, this.score);
     }
     public String toString() {
-        return "Name: " + name + ", Score: " + score + password;
+        return "\nName: " + name + ", Score: " + score;
     }
 }
 
 class scoreboard{
-    String inputFile = "C:\\Users\\person\\Documents\\Jproject3\\Jproject3\\demo\\src\\main\\java\\Project3/scores.txt";
+    static String inputFile = "/Users/person/Jproject3-3/Jproject3/demo/src/main/java/Project3/scores.txt";
     ArrayList<String> names = new ArrayList<>();
     ArrayList<String> passwords = new ArrayList<>();
     ArrayList<Integer> scores = new ArrayList<>();
-    ArrayList<player> allplayers = new ArrayList<>();
+    static ArrayList<playername> allplayers = new ArrayList<>();
+    String player, password;
     public scoreboard(){
-        
+        allplayers.clear();
         try{
             Scanner fscanner = new Scanner(new File(inputFile));
             
@@ -431,32 +485,39 @@ class scoreboard{
                 int score = Integer.parseInt(col[1].trim());
                 String password = col[2].trim();
 
-                player players = new player(name, score, password);
+                playername players = new playername(name, score, password);
                 allplayers.add(players);
             }
         
         Collections.sort(allplayers);
         System.out.printf("SCORES\n");
-        for(int index = 0; index < allplayers.size(); index++){
-            System.out.printf("%s", allplayers.get(index));
-        }
+        // for(int index = 0; index < allplayers.size(); index++){
+        //     System.out.printf("%s", allplayers.get(index));
+        // }
         fscanner.close();
-        }catch (Exception e) {
+        }catch (IOException e) {
             System.err.println("An error occurred while processing the file.");
             e.printStackTrace();
         }
     }
-    public void addPlayer(player newPlayer) {
-        allplayers.add(newPlayer);
-        Collections.sort(allplayers); // Re-sort the list after adding a new player
-    }
-    public ArrayList<player> getAllPlayers() {
+    public ArrayList<playername> getAllPlayers() {
         return allplayers;
     }
 
+    public static void saveScores(String username, int score, String password) {
+        try {
+            FileWriter writer = new FileWriter(new File(inputFile), true);//a pen
+            PrintWriter printWriter = new PrintWriter(writer);
+            printWriter.println(username + ", " + score + ", " + password);
+
+            printWriter.close();
+            writer.close();
+        } catch (IOException e) {
+            System.err.println("An error occurred while writing to the file.");
+            e.printStackTrace();
+        }
+    }
 }
-
-
 
 // class BufferedimageLoader{
 // private BufferedImage image;

@@ -45,7 +45,7 @@ class game extends JPanel implements Runnable // implements KeyListener
     //game is at 766 instead of 768, im sorry.
     public static final int HEIGHT = 768;
     public static String TITLE = "game";
-    private String difficulty;
+    private String difficulty, username, password;
 
 
     private boolean running = false;
@@ -242,12 +242,12 @@ class game extends JPanel implements Runnable // implements KeyListener
         }
         // More bomb stuff
     }
-    
 
     public void init(){
         //focuses on window instantly, no need to click on window to register key
         requestFocus();
         initDifficulty();
+        System.out.println("player: " + username);
 
         //audio
         this.shoot = new MySoundEffect();
@@ -340,7 +340,7 @@ class game extends JPanel implements Runnable // implements KeyListener
 
     //main method is only for testing here since we are launching the game through main.java
     public static void main(String args[]) {
-        game game = new game("Lunatic");
+        game game = new game("Lunatic", "parityfp", "no");
         MouseInput mouseInput = new MouseInput(game);
         game.addKeyListener(new KeyInput(game));
         game.addMouseListener(mouseInput);
@@ -380,8 +380,10 @@ class game extends JPanel implements Runnable // implements KeyListener
 
         game.start();
     }
-    public game(String difficulty) {
+    public game(String difficulty, String username, String password) {
         this.difficulty = difficulty;
+        this.username = username;
+        this.password = password;
     }
     public void togglePauseOnWindowLostFocus() {
         if(!isPaused)isPaused = !isPaused;
@@ -926,6 +928,8 @@ class game extends JPanel implements Runnable // implements KeyListener
         //SwingUtilities.getWindowAncestor(this).dispose();
         music.stopSound();
         SwingUtilities.getWindowAncestor(this).setVisible(false);
+        if(!password.isEmpty() && p.getPoints() > 0)scoreboard.saveScores(username, p.getPoints(), password);
+        if(password.isEmpty() && username.isEmpty() && p.getPoints() > 0) scoreboard.saveScores("Guest", p.getPoints(), "hackermans");
     }
 
     private void restartGame() {

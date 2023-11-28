@@ -11,6 +11,8 @@ interface MyConstants
 {
     static final String RESOURCEPATH        = "/";
 
+    static final String FILE_SCORES     = RESOURCEPATH + "scores.txt";
+
     //----- image files
     static final String FILE_SHIP     = RESOURCEPATH + "Ship_1.png";
     static final String FILE_BULLET     = RESOURCEPATH + "whitebullet.png";
