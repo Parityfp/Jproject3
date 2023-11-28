@@ -11,7 +11,7 @@ class MainApplication extends JFrame {
     private StartButton startButton;
     private JToggleButton[] tb;
     private JLabel drawpane;
-    private ImageIcon backgroundImg;MySoundEffect
+    private ImageIcon backgroundImg;
     private JTextField usernameField;
     private JPasswordField passwordField;
     private JButton creditsButton, guideButton;
