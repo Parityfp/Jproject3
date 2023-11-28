@@ -15,14 +15,14 @@ class StartMenu extends JFrame {
     private JTextField usernameField;
     private JPasswordField passwordField;
     private JButton creditsButton, guideButton;
-    private static String selectedDifficulty = "Lunatic"; 
+    private static String selectedDifficulty = "Lunatic";
     private static MySoundEffect title;
     private boolean mute = false;
 
     public StartMenu() {
         requestFocus();
         setTitle("Start Menu");
-        setBounds(200, 200, 900, 600);
+        setBounds(200, 200, 620, 400);
         setLocationRelativeTo(null);
         setVisible(true);
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
@@ -48,9 +48,8 @@ class StartMenu extends JFrame {
             }
         });
 
-        //audio
+        // audio
         this.title = new MySoundEffect();
-        
 
         // Username and Password
         JPanel authPanel = new JPanel(new GridLayout(3, 2));
@@ -66,9 +65,9 @@ class StartMenu extends JFrame {
         authPanel.setBounds(50, 150, 300, 100);
         contentPane.add(authPanel);
 
-        //Credits button
+        // Credits button
         creditsButton = new JButton("Credits");
-        creditsButton.setBounds(480, 220, 100, 30);
+        creditsButton.setBounds(490, 320, 100, 30);
         contentPane.add(creditsButton);
 
         creditsButton.addActionListener(new ActionListener() {
@@ -77,9 +76,9 @@ class StartMenu extends JFrame {
                 showCredits();
             }
         });
-        //Guide button
+        // Guide button
         guideButton = new JButton("Guide");
-        guideButton.setBounds(480, 180, 100, 30);
+        guideButton.setBounds(490, 280, 100, 30);
         contentPane.add(guideButton);
 
         guideButton.addActionListener(new ActionListener() {
@@ -130,7 +129,7 @@ class StartMenu extends JFrame {
             }
         });
 
-        setPreferredSize(new Dimension(getWidth() , getHeight() ));
+        setPreferredSize(new Dimension(getWidth(), getHeight()));
 
         AddBackground();
 
@@ -141,17 +140,16 @@ class StartMenu extends JFrame {
             @Override
             public void run() {
                 title.SFX(MyConstants.FILE_TITLE, true, 0.5f);
-            }   
+            }
         });
     }
 
     private void AddBackground() {
-        backgroundImg = new ImageIcon(getClass().getResource("spaceBG.png"));
-        ImageIcon originalGif = new ImageIcon(getClass().getResource(MyConstants.FILE_BG3));
+        ImageIcon originalGif = new ImageIcon(getClass().getResource("backGround5.gif"));
         Image scaledImage = originalGif.getImage().getScaledInstance(getWidth(), getHeight(), Image.SCALE_DEFAULT);
         ImageIcon scaledGif = new ImageIcon(scaledImage);
         drawpane = new JLabel(scaledGif);
-        //drawpane.setIcon(backgroundImg);
+        // drawpane.setIcon(backgroundImg);
         drawpane.setLayout(null);
 
         drawpane.setBounds(0, 0, getWidth(), getHeight());
@@ -207,7 +205,7 @@ class StartMenu extends JFrame {
         guideFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
         CardLayout cardLayout = new CardLayout();
-        JPanel cardPanel = new JPanel(cardLayout); 
+        JPanel cardPanel = new JPanel(cardLayout);
 
         addImagePanel(MyConstants.FILE_SLIDE1, cardPanel);
         addImagePanel(MyConstants.FILE_SLIDE2, cardPanel);
@@ -225,7 +223,6 @@ class StartMenu extends JFrame {
         prevButton.setPreferredSize(new Dimension(500, 40));
         nextButton.setPreferredSize(new Dimension(500, 40));
 
-
         JPanel buttonPanel = new JPanel();
         buttonPanel.add(prevButton);
         buttonPanel.add(nextButton);
@@ -233,7 +230,7 @@ class StartMenu extends JFrame {
 
         guideFrame.setLayout(new BorderLayout());
         guideFrame.add(cardPanel, BorderLayout.CENTER);
-        guideFrame.add(buttonPanel, BorderLayout.SOUTH); 
+        guideFrame.add(buttonPanel, BorderLayout.SOUTH);
 
         guideFrame.pack();
         guideFrame.setLocationRelativeTo(null);
@@ -244,16 +241,16 @@ class StartMenu extends JFrame {
         JPanel panel = new JPanel();
         JLabel label = new JLabel(new ImageIcon(getClass().getResource(imagePath)));
         panel.add(label);
-        cardPanel.add(panel); 
+        cardPanel.add(panel);
     }
 
-
-    public static String getDifficulty(){
+    public static String getDifficulty() {
         return selectedDifficulty;
     }
-    public static void stoptitleSound(){
-            title.stopSound();
-        }
+
+    public static void stoptitleSound() {
+        title.stopSound();
+    }
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
@@ -265,7 +262,7 @@ class StartMenu extends JFrame {
 class StartButton extends JButton implements MouseListener {
 
     private int curX = 50, curY = 0;
-    private int width = 150, height = 100;
+    private int width = 100, height = 100;
 
     private ImageIcon startImage;
     private game gameInstance;
@@ -273,7 +270,7 @@ class StartButton extends JButton implements MouseListener {
 
     public StartButton(game gameInstance) {
         // Load image from the resources
-        startImage = new ImageIcon(getClass().getResource("startButton.png"));
+        startImage = new ImageIcon(getClass().getResource("newStartButton.png"));
 
         // Resize the image to fit the button
         Image scaledImage = startImage.getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH);
