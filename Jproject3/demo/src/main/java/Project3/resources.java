@@ -41,6 +41,7 @@ interface MyConstants
     static final String FILE_OK     = RESOURCEPATH + "ok00.wav";
     static final String FILE_ITEM     = RESOURCEPATH + "item00.wav";
     static final String FILE_THEME     = RESOURCEPATH + "discolor.wav";
+    static final String FILE_KURUKURU     = RESOURCEPATH + "kurukuru.wav";
 
     //----- IMPORTANT
     static final String NON_SUSPICIOUS_LINK     = RESOURCEPATH + "https://www.youtube.com/watch?v=dQw4w9WgXcQ";

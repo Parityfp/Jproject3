@@ -53,7 +53,7 @@ class game extends JPanel implements Runnable // implements KeyListener
     private BufferedImage image = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
     private ImageIcon bg;
     private Clip clip; 
-    private MySoundEffect shoot, hit, bomb, ready, bling, collect, music;
+    private MySoundEffect shoot, hit, bomb, ready, bling, collect, music, kurukuru;
 
 
     private JLabel pointsLabel, bombsLabel, pauseLabel;
@@ -112,6 +112,7 @@ class game extends JPanel implements Runnable // implements KeyListener
     private boolean shootingEnemyActive = false;
     private int shootingEnemyTimer = 0;
     private int shootingEnemyCooldown = 5 * 60; 
+    private int HertaSpawn;
     private void addEnemy(double x, double y, String enemyType) {
         Enemy newEnemy;
         switch (enemyType) {
@@ -256,6 +257,7 @@ class game extends JPanel implements Runnable // implements KeyListener
         this.bling = new MySoundEffect();
         this.collect = new MySoundEffect();
         this.music = new MySoundEffect();
+        this.kurukuru = new MySoundEffect();
         //music.SFX(MyConstants.FILE_THEME, true, 0.25f);//the volume level, try from 0-1
         //should make a method for this
         pointsLabel = new JLabel("0");
@@ -292,6 +294,7 @@ class game extends JPanel implements Runnable // implements KeyListener
         this.add(pointsLabel);
         this.add(bombsLabel);
         this.add(pauseLabel);
+        pointsLabel.setText("");
 
         
 
@@ -439,6 +442,7 @@ class game extends JPanel implements Runnable // implements KeyListener
         //indicates when enemies should stop spawning, for bosses or special events, number divides by 60 for time in secondsd
         //main game cycle
         int currentCycleTick = gameTickCounter % cycleLength;
+        
         if(currentCycleTick < enemyPhaseLength){
             if (enemySpawnCounter >= enemySpawnThreshold) {
                 addEnemy(new Random().nextDouble() * (WIDTH - 50), 0, "DefaultEnemy"); // Example: spawn at a random x position at the top
@@ -450,10 +454,18 @@ class game extends JPanel implements Runnable // implements KeyListener
                 enemySpawnCounter = 0;
             }
         }
+        
+        if (currentCycleTick == 1) {
+            HertaSpawn = new Random().nextInt(100);
+            System.out.println("Cycle Started" + HertaSpawn);
+        }
+        
+        System.out.println("Cycle tick" + currentCycleTick);
+        if (currentCycleTick > plasmaTimer + 120 && HertaSpawn <30) kurukuru.SFX(MyConstants.FILE_KURUKURU, false, 1f);
         if (currentCycleTick == cycleLength - 1) {  
             enemyHpMultiplier++;
-            System.out.println("Cycle completed");
-        if (new Random().nextInt(100) < 100) { // chance for Herta to spawn every cycle
+            System.out.println("Cycle completed" + HertaSpawn);
+        if (HertaSpawn <30) { // chance for Herta to spawn every cycle
             double x = new Random().nextDouble() * (WIDTH - 50);
             addEnemy(x, 0, "Herta");
             }
@@ -585,7 +597,7 @@ class game extends JPanel implements Runnable // implements KeyListener
                                 double offsetY = (Math.random() - 0.5) * 160;
                                 items.add(new point(this, e.getX() + offsetX, e.getY() + offsetY, enemyType));
                             }
-                            attractDelay = 90; //after herta killed, how long till attract
+                            attractDelay = 60; //after herta killed, how long till attract
                             items.add(new star(this, e.getX(), e.getY(), 3));
                             bling.SFX(MyConstants.FILE_BLING, false, 0.7f);
                         }
