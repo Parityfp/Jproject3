@@ -59,7 +59,7 @@ class game extends JPanel implements Runnable // implements KeyListener
     private long pausePosition;
 
 
-    private JLabel pointsLabel, bombsLabel, pauseLabel;
+    public JLabel pointsLabel, bombsLabel, pauseLabel, timeLabel, hpLabel;
 
     private player p;
     public double getPlayerX() {
@@ -155,7 +155,7 @@ class game extends JPanel implements Runnable // implements KeyListener
                 break;
 
             case "Herta":
-                newEnemy = new Herta(this, x, y, enemyHpMultiplier);
+                newEnemy = new Herta(this, x, y, enemyHpMultiplier, hpLabel);
                 break;
             default:
                 newEnemy = new DefaultEnemy(this, x, y, enemyHpMultiplier);
@@ -263,7 +263,7 @@ class game extends JPanel implements Runnable // implements KeyListener
         this.kurukuru = new MySoundEffect();
         //music.SFX(MyConstants.FILE_THEME, true, 0.25f);//the volume level, try from 0-1
         //should make a method for this
-        pointsLabel = new JLabel("0");
+        pointsLabel = new JLabel("");
         pointsLabel.setForeground(Color.WHITE); 
         pointsLabel.setFont(new Font("Monospaced", Font.BOLD, 22));
         pointsLabel.setBounds(WIDTH - 340, 45, 350, 30);
@@ -292,13 +292,26 @@ class game extends JPanel implements Runnable // implements KeyListener
         pauseLabel.setHorizontalAlignment(SwingConstants.CENTER);
         pauseLabel.setVisible(false);
         pauseLabel.setLayout(new BorderLayout());
+
+        //time
+        timeLabel = new JLabel("Time: ");
+        timeLabel.setForeground(Color.WHITE); 
+        timeLabel.setFont(new Font("Monospaced", Font.BOLD, 22));
+        timeLabel.setBounds(WIDTH - 340, 125, 350, 30);
+
+        //Herta HP
+        hpLabel = new JLabel("");
+        hpLabel.setForeground(Color.WHITE); 
+        hpLabel.setFont(new Font("Monospaced", Font.BOLD, 22));
+        hpLabel.setBounds(WIDTH - 340, 165, 700, 30);
         
         this.setLayout(null); // null layout for absolute positioning
         this.add(pointsLabel);
         this.add(bombsLabel);
         this.add(pauseLabel);
-        pointsLabel.setText("");
-
+        this.add(timeLabel);
+        this.add(hpLabel);
+        //pointsLabel.setText("");
         
 
         p = new player(WIDTH / 2, HEIGHT - 32);
@@ -420,6 +433,7 @@ class game extends JPanel implements Runnable // implements KeyListener
         if(gameTickCounter == 1)music.SFX(MyConstants.FILE_THEME, true, 0.25f);//the volume level, try from 0-1
         gameTickCounter++;
 
+        timeLabel.setText("Time: " + gameTickCounter/60);
         if (shooting) {
             // adjust the rate as needed
             if (bulletCounter % bulletThreshold == 0) {
@@ -483,12 +497,12 @@ class game extends JPanel implements Runnable // implements KeyListener
             System.out.println("Cycle Started" + HertaSpawn);
         }
         
-        System.out.println("Cycle tick" + currentCycleTick);
-        if (currentCycleTick == plasmaTimer + 120 && HertaSpawn <30) kurukuru.SFX(MyConstants.FILE_KURUKURU, false, 1f);
+        //System.out.println("Cycle tick" + currentCycleTick);
+        if (currentCycleTick == plasmaTimer + 120 && HertaSpawn <100) kurukuru.SFX(MyConstants.FILE_KURUKURU, false, 1f);
         if (currentCycleTick == cycleLength - 1) {  
             enemyHpMultiplier++;
             System.out.println("Cycle completed" + HertaSpawn);
-        if (HertaSpawn <30) { // chance for Herta to spawn every cycle
+        if (HertaSpawn <100) { // chance for Herta to spawn every cycle
             double x = new Random().nextDouble() * (WIDTH - 50);
             addEnemy(x, 0, "Herta");
             }
@@ -1039,7 +1053,7 @@ abstract class Enemy {
         // Common initialization
     }
 
-    public abstract void tick(); // Each enemy type can have its own implementation
+    public abstract void tick(); // Each enemy type has its own implementation
 
     public void render(Graphics g) {
         if (enemyImage != null) {
@@ -1097,7 +1111,7 @@ class DefaultEnemy extends Enemy {
         if (x <= 0 + 350) x = 0 + 350;
         if (x >= (1366 - 350) - 64) x = (1366 - 350) - 64;
         if (y <= 0 + 50) y = 0 + 50;
-        if (y >= 766 - 50){
+        if (y >= 766 - 50 - 64){
             y = 0;
             initialX = 350 + new Random().nextInt(game.WIDTH - 700);
         } 
@@ -1206,8 +1220,10 @@ class Herta extends Enemy{
     private double velX = 1.5, velY = 1;
     private int hitThreshold = 250; 
     private ImageIcon enemyImage;
-    public Herta(game game, double x, double y, double thresholdMultiplier) {
+    public JLabel hpLabel;
+    public Herta(game game, double x, double y, double thresholdMultiplier, JLabel hpLabel) {
         super(game, x, y, thresholdMultiplier);
+        this.hpLabel = hpLabel;
         enemyImage = new ImageIcon(getClass().getResource(MyConstants.FILE_SPECIAL));
     }
 
@@ -1245,7 +1261,40 @@ class Herta extends Enemy{
     @Override
     public void hit() {
         hitCount++;
-        System.out.println((hitThreshold * thresholdMultiplier) - hitCount);
+        //System.out.println((hitThreshold * thresholdMultiplier) - hitCount);
+        System.out.println(((hitThreshold * thresholdMultiplier) - hitCount) / (hitThreshold * thresholdMultiplier));
+        
+        if(((hitThreshold * thresholdMultiplier) - hitCount) / (hitThreshold * thresholdMultiplier) >= 0.9) 
+            hpLabel.setText("////////////////////");
+        else if(((hitThreshold * thresholdMultiplier) - hitCount) / (hitThreshold * thresholdMultiplier) > 0.8 &&
+                ((hitThreshold * thresholdMultiplier) - hitCount) / (hitThreshold * thresholdMultiplier) < 0.9 )  
+            hpLabel.setText("//////////////////");
+        else if(((hitThreshold * thresholdMultiplier) - hitCount) / (hitThreshold * thresholdMultiplier) > 0.7 &&
+                ((hitThreshold * thresholdMultiplier) - hitCount) / (hitThreshold * thresholdMultiplier) < 0.8 )  
+            hpLabel.setText("////////////////");
+        else if(((hitThreshold * thresholdMultiplier) - hitCount)/(hitThreshold * thresholdMultiplier) > 0.6 &&
+                ((hitThreshold * thresholdMultiplier) - hitCount)/(hitThreshold * thresholdMultiplier) < 0.7 )  
+            hpLabel.setText("//////////////");
+        else if(((hitThreshold * thresholdMultiplier) - hitCount)/(hitThreshold * thresholdMultiplier) > 0.5 &&
+                ((hitThreshold * thresholdMultiplier) - hitCount)/(hitThreshold * thresholdMultiplier) < 0.6 )  
+            hpLabel.setText("////////////");
+        else if(((hitThreshold * thresholdMultiplier) - hitCount)/(hitThreshold * thresholdMultiplier) > 0.4 &&
+                ((hitThreshold * thresholdMultiplier) - hitCount)/(hitThreshold * thresholdMultiplier) < 0.5 )  
+            hpLabel.setText("//////////");
+        else if(((hitThreshold * thresholdMultiplier) - hitCount)/(hitThreshold * thresholdMultiplier) > 0.3 &&
+                ((hitThreshold * thresholdMultiplier) - hitCount)/(hitThreshold * thresholdMultiplier) < 0.4 )  
+            hpLabel.setText("////////");
+        else if(((hitThreshold * thresholdMultiplier) - hitCount)/(hitThreshold * thresholdMultiplier) > 0.2 &&
+                ((hitThreshold * thresholdMultiplier) - hitCount)/(hitThreshold * thresholdMultiplier) < 0.3 )  
+            hpLabel.setText("//////");
+        else if(((hitThreshold * thresholdMultiplier) - hitCount)/(hitThreshold * thresholdMultiplier) > 0.1 &&
+                ((hitThreshold * thresholdMultiplier) - hitCount)/(hitThreshold * thresholdMultiplier) < 0.2 )  
+            hpLabel.setText("////");
+        else if(((hitThreshold * thresholdMultiplier) - hitCount)/(hitThreshold * thresholdMultiplier) > 0 &&
+                ((hitThreshold * thresholdMultiplier) - hitCount)/(hitThreshold * thresholdMultiplier) < 0.1 )  
+            hpLabel.setText("//");
+        else hpLabel.setText("");
+        //hpLabel.setText(String.valueOf((hitThreshold * thresholdMultiplier) - hitCount));
         if (hitCount >= hitThreshold * thresholdMultiplier) {
             destroyed = true;
         }
