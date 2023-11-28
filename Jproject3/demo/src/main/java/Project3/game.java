@@ -36,13 +36,12 @@ import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-//TODO arraylist for sounds
-class game extends JPanel implements Runnable // implements KeyListener
+class game extends JPanel implements Runnable
 {
 
-    //if change dimensions do not forget to change other code that relies on it
+    //If change dimensions do not forget to change other code that relies on it
     public static final int WIDTH = 1366;
-    //game is at 766 instead of 768, im sorry.
+    //Game is at 766 instead of 768, im sorry.
     public static final int HEIGHT = 768;
     public static String TITLE = "game";
     private String difficulty;
@@ -81,8 +80,8 @@ class game extends JPanel implements Runnable // implements KeyListener
 
 
     //stolen variables from magnet
-    private double pspawnX; // Spawn at the left edge of the screen
-    private double pspawnY; // Random Y position or a specific pattern
+    private double pspawnX; 
+    private double pspawnY; 
     private int attractDelay = 0; //for Herta
 
     
@@ -100,7 +99,7 @@ class game extends JPanel implements Runnable // implements KeyListener
     private int bombTimer = 0;
     private final int bombTimerThreshold = 10 * 60;
     private boolean bombAvailable = false;
-    private int starThreshold = 20000; // Initial score required for the first star
+    private int starThreshold = 20000; // initial score required for the first star
     private int starThresholdIncrement = 80000;
 
     //same thing for enemies
@@ -200,7 +199,6 @@ class game extends JPanel implements Runnable // implements KeyListener
     
     //bomb stuff
     private void activateBomb() {
-        // Play bomb sound and gif
         bomb.SFX(MyConstants.FILE_BOMB, false, 0.5f);
         //copy item generation technique from other method
         for (Enemy e : enemies) {
@@ -240,7 +238,6 @@ class game extends JPanel implements Runnable // implements KeyListener
         for (item it : items) {
             it.attractToPlayer();
         }
-        // More bomb stuff
     }
     
 
@@ -258,7 +255,7 @@ class game extends JPanel implements Runnable // implements KeyListener
         this.collect = new MySoundEffect();
         this.music = new MySoundEffect();
         this.kurukuru = new MySoundEffect();
-        //music.SFX(MyConstants.FILE_THEME, true, 0.25f);//the volume level, try from 0-1
+
         //should make a method for this
         pointsLabel = new JLabel("");
         pointsLabel.setForeground(Color.WHITE); 
@@ -296,7 +293,7 @@ class game extends JPanel implements Runnable // implements KeyListener
         timeLabel.setFont(new Font("Monospaced", Font.BOLD, 22));
         timeLabel.setBounds(WIDTH - 340, 125, 350, 30);
 
-        //Herta HP
+        //herta HP
         hpLabel = new JLabel("");
         hpLabel.setForeground(Color.WHITE); 
         hpLabel.setFont(new Font("Monospaced", Font.BOLD, 22));
@@ -308,7 +305,6 @@ class game extends JPanel implements Runnable // implements KeyListener
         this.add(pauseLabel);
         this.add(timeLabel);
         this.add(hpLabel);
-        //pointsLabel.setText("");
         
 
         p = new player(WIDTH / 2, HEIGHT - 32);
@@ -423,7 +419,6 @@ class game extends JPanel implements Runnable // implements KeyListener
         
     }
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////TICK
     private void tick() {
         if(isPaused)return;
         p.tick();
@@ -432,19 +427,18 @@ class game extends JPanel implements Runnable // implements KeyListener
         System.out.println(bullets.size());
         timeLabel.setText("Time: " + gameTickCounter/60);
 
-        /////////////////// MAIN SHOOTING CONTROL ///////////////////
         if (shooting  && !enemies.isEmpty()) {
             Enemy targetEnemy;
-            // adjust the rate as needed
+
             if (bulletCounter % bulletThreshold == 0) {
-                targetEnemy = enemies.get(0); // Assuming there's always at least one enemy, change later TODO
+                targetEnemy = enemies.get(0); 
                 if (p.getUpgrades() == 0) {
                     bullets.add(new playerBullet(p.getX() + 9, p.getY(), targetEnemy));
                     if(attracting) for (Bullet b : bullets)if (b.getAge() >= 5)b.attractToEnemy();
                 } else {
-                    // Fire multiple bullets with spread
-                    double spreadAngle = Math.toRadians(10); // Angle between each bullet
-                    int totalBullets = 1 + 2 * p.getUpgrades(); // Always an odd number to include the center bullet
+                    // fire multiple bullets with spread
+                    double spreadAngle = Math.toRadians(10); // angle between each bullet
+                    int totalBullets = 1 + 2 * p.getUpgrades(); // always an odd number to include the center bullet
                     for (int i = 0; i < totalBullets; i++) {
                         double angle = spreadAngle * (i - p.getUpgrades());
                         double dx = Math.sin(angle);
@@ -457,7 +451,6 @@ class game extends JPanel implements Runnable // implements KeyListener
                     }                    
                 }
                 totalBulletsShot++;
-                //TODO make sound loop WORK
                 shoot.SFX(MyConstants.FILE_SHOOT, false, 0.2f);
             }
             bulletCounter++;
@@ -487,7 +480,7 @@ class game extends JPanel implements Runnable // implements KeyListener
         
         if(currentCycleTick < enemyPhaseLength){
             if (enemySpawnCounter >= enemySpawnThreshold) {
-                addEnemy(new Random().nextDouble() * (WIDTH - 50), 0, "DefaultEnemy"); // Example: spawn at a random x position at the top
+                addEnemy(new Random().nextDouble() * (WIDTH - 50), 0, "DefaultEnemy");
                 if (!shootingEnemyActive && shootingEnemyTimer >= shootingEnemyCooldown) {
                     addEnemy(new Random().nextDouble() * (WIDTH - 50), 0, "shootingEnemy");
                     shootingEnemyActive = true;
@@ -517,7 +510,6 @@ class game extends JPanel implements Runnable // implements KeyListener
         //every second, adjust plasma spawn rate here. use prime numbers for main delay
         //added break time for player to clear enemies (5 seconds)
         if (currentCycleTick > plasmaTimer && currentCycleTick % plasmaCooldown == 0) {
-            //shoot();
             //random position for plasma bullets
             if(Math.random() < 0.5){
                 pspawnX = 350;
@@ -533,8 +525,7 @@ class game extends JPanel implements Runnable // implements KeyListener
         } 
         for (Bullet p : bullets) if (p instanceof plasma) p.attractToPlayer();
         
-
-        // Update and remove enemies
+        // update and remove enemies
         Iterator<Enemy> iterator = enemies.iterator();
         while (iterator.hasNext()) {
             Enemy enemy = iterator.next();
@@ -545,13 +536,12 @@ class game extends JPanel implements Runnable // implements KeyListener
         }
 
         //star spawn, 0.05% per tick, ~3% per second **add extra 0 first
-        //if(Math.random() < 0.005) items.add(new star(this, new Random().nextInt(game.WIDTH - 350), 100, 3));
 
         if (p.getPoints() >= starThreshold) {
             bling.SFX(MyConstants.FILE_BLING, false, 0.7f);
             items.add(new star(this, new Random().nextInt(game.WIDTH - 350), 100, 3));
             starThreshold += starThresholdIncrement;
-            starThresholdIncrement *= 3; // comment for non - exponential growth
+            starThresholdIncrement *= 3; 
         }
     
 
@@ -590,7 +580,7 @@ class game extends JPanel implements Runnable // implements KeyListener
 
         for (Enemy e : enemies) {
             if (p.getBounds().intersects(e.getBounds())) {
-                // Handle collision between player and enemy
+                // handle collision between player and enemy
                 System.out.println("player hit, GAME OVER");
                 running = false; //try to quit game, maybe change this when implementing retry button.
                 SwingUtilities.invokeLater(this::showGameOverScreen);
@@ -599,8 +589,8 @@ class game extends JPanel implements Runnable // implements KeyListener
     
             for (Bullet b : bullets) {
                 if (b.getBounds().intersects(e.getBounds()) && !b.isEnemyBullet) {
-                    // Handle collision between bullet and enemy
-                    // Remove the enemy and the bullet, or mark them for removal
+                    // handle collision between bullet and enemy
+                    //remove the enemy and the bullet, or mark them for removal
                     //System.out.println("enemy hit");
                     hit.SFX(MyConstants.FILE_HIT, false, 0.3f);
                 }
@@ -611,31 +601,31 @@ class game extends JPanel implements Runnable // implements KeyListener
         //for enemy hit
         for (int i = bullets.size() - 1; i >= 0; i--) {
             Bullet b = bullets.get(i);
-            // Reverse loop for enemies
+            // reverse loop for enemies
             for (int j = enemies.size() - 1; j >= 0; j--) {
                 Enemy e = enemies.get(j);
                 if (b.getBounds().intersects(e.getBounds())) {
                     if(!b.isEnemyBullet){
-                        e.hit(); // Enemy has been hit
-                        bullets.remove(i); // Remove the bullet
+                        e.hit(); // enemy has been hit
+                        bullets.remove(i); //remove the bullet
                     }
                     if (e.isDestroyed()) {
                         int enemyType = 0;
                         if(e instanceof shootingEnemy){
                             shootingEnemyActive = false;
                             enemyType = 1;
-                            int numItems = 5; // Number of items in the cluster
+                            int numItems = 5; // number of items in the cluster
                             for (int k = 0; k < numItems; k++) {
                                 double offsetX = (Math.random() - 0.5) * 20; // between -10 and 10
                                 double offsetY = (Math.random() - 0.5) * 20;
-                                // Spawn a new item with the offset
+                                //spawn a new item with the offset
                                 items.add(new point(this, e.getX() + offsetX, e.getY() + offsetY, enemyType));
                             } 
                         }else if (e instanceof Herta) {
                             enemyType = 2;
                             int numItems = 30;
                             for (int k = 0; k < numItems; k++) {
-                                double offsetX = (Math.random() - 0.5) * 160; // Increase spread
+                                double offsetX = (Math.random() - 0.5) * 160; // increase spread
                                 double offsetY = (Math.random() - 0.5) * 160;
                                 items.add(new point(this, e.getX() + offsetX, e.getY() + offsetY, enemyType));
                             }
@@ -644,12 +634,11 @@ class game extends JPanel implements Runnable // implements KeyListener
                             bling.SFX(MyConstants.FILE_BLING, false, 0.7f);
                         }
                         if(e instanceof DefaultEnemy)items.add(new point(this, e.getX(), e.getY(), enemyType));
-                        enemies.remove(j); // Remove the enemy if it's destroyed
+                        enemies.remove(j); 
                     }
     
                     //System.out.println("enemy hit");
     
-                    // Break out of the enemies loop since the bullet is removed
                     break;
                 }
             }
@@ -667,7 +656,7 @@ class game extends JPanel implements Runnable // implements KeyListener
             it.tick();
             if (p.getBounds().intersects(it.getBounds())) {
                 collect.SFX(MyConstants.FILE_ITEM, false, 0.2f);
-                // Increase player's points, can add if or case statement for how much to increase depending on the enmemy type
+                // increase player's points
                 switch (it.getEnemyType()) {
                     case 0:
                         p.addPoints(1500);
@@ -703,14 +692,10 @@ class game extends JPanel implements Runnable // implements KeyListener
     
     }
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////RENDER
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
     
-        //if statement if tick at 1 so
-
-        // Draw the background image
         g.drawImage(image, 0, 0, getWidth(), getHeight(), this);
 
         int startX = (WIDTH - 666) / 2;
@@ -721,12 +706,12 @@ class game extends JPanel implements Runnable // implements KeyListener
             g.drawImage(bg.getImage(), startX, startY, 666, 666, this);
         }
     
-        // Render the player
+        // render the player
         if (p != null) {
             p.render(g);
         }
     
-        // Render bullets
+        // render bullets
         for (Bullet bullet : new ArrayList<>(bullets)) {
             if (bullet != null) {
                 bullet.render(g);
@@ -738,7 +723,7 @@ class game extends JPanel implements Runnable // implements KeyListener
             it.render(g);
         }
     
-        //render enemies
+        // render enemies
         for (Enemy enemy : new ArrayList<>(enemies)) {
             if (enemy != null) {
                 enemy.render(g);
@@ -746,7 +731,7 @@ class game extends JPanel implements Runnable // implements KeyListener
         }
     
     
-        Toolkit.getDefaultToolkit().sync(); // Uncomment this if there are any rendering issues
+        Toolkit.getDefaultToolkit().sync(); // uncomment this if there are any rendering issues
     }
     
     private boolean rightPressed = false;
@@ -874,12 +859,12 @@ class game extends JPanel implements Runnable // implements KeyListener
         }
     }
 
-    //GAME OVER SCREEN//
+    //GAME OVER screen
     public void showGameOverScreen() {
         JFrame gameOverFrame = new JFrame("Game Over");
         gameOverFrame.setSize(500, 350);
         gameOverFrame.setLayout(new BorderLayout());
-        gameOverFrame.setLocationRelativeTo(null); // Center on screen
+        gameOverFrame.setLocationRelativeTo(null); 
         String gameOverText = "<html>Game Over<br/>Score: " + p.getPoints() + "</html>";
     
         JLabel gameOverLabel = new JLabel(gameOverText, SwingConstants.CENTER);
@@ -888,14 +873,14 @@ class game extends JPanel implements Runnable // implements KeyListener
         JButton restartButton = new JButton("Back to Start Menu");
         restartButton.addActionListener(e -> {
             SwingUtilities.getWindowAncestor(this).dispose();
-            gameOverFrame.dispose(); // Close the Game Over screen
-            new MainApplication().setVisible(true); // Show the Start Menu
+            gameOverFrame.dispose(); 
+            new MainApplication().setVisible(true); 
         });
         JButton retryButton = new JButton("Retry");
         retryButton.addActionListener(e -> {
             //SwingUtilities.getWindowAncestor(this).dispose();
             SwingUtilities.getWindowAncestor(this).setVisible(true);
-            gameOverFrame.dispose(); // Close the Game Over screen
+            gameOverFrame.dispose(); 
             restartGame();  
         });
         JButton exitButton = new JButton("Exit");
@@ -903,7 +888,7 @@ class game extends JPanel implements Runnable // implements KeyListener
             stop();
             running = false;
             SwingUtilities.getWindowAncestor(this).dispose();
-            gameOverFrame.dispose(); // Close the Game Over screen
+            gameOverFrame.dispose(); 
             System.exit(0); 
         });
 
@@ -964,7 +949,6 @@ class game extends JPanel implements Runnable // implements KeyListener
     }
 }
 
-//////////////////////////////////// PLAYER CLASS ////////////////////////////////////
 
 class player {
 
@@ -1043,7 +1027,6 @@ class player {
         return y;
     }
 }
-//////////////////////////////////// ENEMY CLASS ////////////////////////////////////
 
 abstract class Enemy {
     protected double x, y;
@@ -1060,10 +1043,9 @@ abstract class Enemy {
         this.thresholdMultiplier = thresholdMultiplier;
         this.x = x;
         this.y = y;
-        // Common initialization
     }
 
-    public abstract void tick(); // Each enemy type has its own implementation
+    public abstract void tick(); 
 
     public void render(Graphics g) {
         if (enemyImage != null) {
@@ -1174,7 +1156,7 @@ class shootingEnemy extends Enemy{
     public void setvelX(double velX) {this.velX = velX;}
     @Override
     public void tick() {
-        // Enemy movement logic, probably a linear function
+        // enemy movement logic, probably a linear function
         y+=1;
         x+=velX;
         if (currentCooldown <= 0) {
@@ -1310,10 +1292,10 @@ class Herta extends Enemy{
         }
     }
 }
-//////////////////////////////////// BULLET CLASS ////////////////////////////////////
+
 abstract class Bullet {
-    protected double x, y, dx; // X direction
-    protected double dy = -1; // Y direction
+    protected double x, y, dx; 
+    protected double dy = -1; 
     protected double speed = 15.0;
     protected BufferedImage bullet;
     protected boolean isEnemyBullet;
@@ -1350,7 +1332,7 @@ abstract class Bullet {
             double deltaY = playerY - y;
             //pythagorus, calculate hypotenuse 
             double distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-            if (distance > 1) { // Prevent division by zero
+            if (distance > 1) { 
                 double directionX = deltaX / distance;
                 double directionY = deltaY / distance;
 
@@ -1474,7 +1456,6 @@ class plasma extends enemyBullet{
 
 }
 
-//////////////////////////////////// ITEM CLASS ////////////////////////////////////
 
 abstract class item{
     protected BufferedImage item;
@@ -1504,7 +1485,7 @@ abstract class item{
             double deltaY = playerY - y;
             //pythagorus, calculate hypotenuse 
             double distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-            if (distance > 1) { // Prevent division by zero
+            if (distance > 1) { 
                 double directionX = deltaX / distance;
                 double directionY = deltaY / distance;
 
@@ -1512,7 +1493,7 @@ abstract class item{
                 y += directionY * speed;
             }
         } else {
-            // Normal falling logic
+            // normal falling logic
             x += velX;
             y += velY;
 
@@ -1573,7 +1554,6 @@ class star extends item{
 
 }
 
-//////////////////////////////////// INPUT CLASS ////////////////////////////////////
 
 class KeyInput extends KeyAdapter {
 
