@@ -6,6 +6,11 @@ import javax.swing.event.ChangeListener;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Scanner;
+
 import javax.sound.*;
 
 class MainApplication extends JFrame {
@@ -289,6 +294,11 @@ class MainApplication extends JFrame {
         SwingUtilities.invokeLater(() -> {
             new MainApplication();
         });
+        scoreboard sb = new scoreboard();
+        for (player p : sb.getAllPlayers()) {
+            System.out.println(p); // Assuming player class has a meaningful toString() method
+        }
+
     }
 }
 
@@ -378,6 +388,75 @@ class StartButton extends JButton implements MouseListener {
     }
     
 }
+
+/////////////////Scoreboard 
+
+
+class player implements Comparable<player> {
+    private String name;
+    private int score;
+    private String password;
+
+    public player(String name, int score, String password){
+        this.name = name;
+        this.score = score;
+        this.password = password;
+    }
+
+    @Override
+    public int compareTo(player other) {
+        return Integer.compare(this.score, other.score);
+    }
+    public String toString() {
+        return "Name: " + name + ", Score: " + score + password;
+    }
+}
+
+class scoreboard{
+    String inputFile = "C:\\Users\\person\\Documents\\Jproject3\\Jproject3\\demo\\src\\main\\java\\Project3/scores.txt";
+    ArrayList<String> names = new ArrayList<>();
+    ArrayList<String> passwords = new ArrayList<>();
+    ArrayList<Integer> scores = new ArrayList<>();
+    ArrayList<player> allplayers = new ArrayList<>();
+    public scoreboard(){
+        
+        try{
+            Scanner fscanner = new Scanner(new File(inputFile));
+            
+            while(fscanner.hasNext()){
+                String line = fscanner.nextLine();
+                String [] col = line.split(","); 
+                
+                String name = col[0].trim();
+                int score = Integer.parseInt(col[1].trim());
+                String password = col[2].trim();
+
+                player players = new player(name, score, password);
+                allplayers.add(players);
+            }
+        
+        Collections.sort(allplayers);
+        System.out.printf("SCORES\n");
+        for(int index = 0; index < allplayers.size(); index++){
+            System.out.printf("%s", allplayers.get(index));
+        }
+        fscanner.close();
+        }catch (Exception e) {
+            System.err.println("An error occurred while processing the file.");
+            e.printStackTrace();
+        }
+    }
+    public void addPlayer(player newPlayer) {
+        allplayers.add(newPlayer);
+        Collections.sort(allplayers); // Re-sort the list after adding a new player
+    }
+    public ArrayList<player> getAllPlayers() {
+        return allplayers;
+    }
+
+}
+
+
 
 // class BufferedimageLoader{
 // private BufferedImage image;
