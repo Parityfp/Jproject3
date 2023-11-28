@@ -30,6 +30,7 @@ interface MyConstants
     static final String FILE_SLIDE4     = RESOURCEPATH + "mspaint4.png";
     static final String FILE_SLIDE5     = RESOURCEPATH + "mspaint5.png";
     static final String FILE_SLIDE6     = RESOURCEPATH + "mspaint6.png";
+    static final String FILE_SLIDE7     = RESOURCEPATH + "mspaint7.png";
 
 
 //////////////////////////////////// ITEMS ////////////////////////////////////

@@ -230,6 +230,7 @@ class MainApplication extends JFrame {
         addImagePanel(MyConstants.FILE_SLIDE4, cardPanel);
         addImagePanel(MyConstants.FILE_SLIDE5, cardPanel);
         addImagePanel(MyConstants.FILE_SLIDE6, cardPanel);
+        addImagePanel(MyConstants.FILE_SLIDE7, cardPanel);
 
         JButton prevButton = new JButton("<<");
         prevButton.addActionListener(e -> cardLayout.previous(cardPanel));
