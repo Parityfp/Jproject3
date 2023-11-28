@@ -18,6 +18,7 @@ class StartMenu extends JFrame {
     private static String selectedDifficulty = "Lunatic";
     private static MySoundEffect title;
     private boolean mute = false;
+    private JSlider volumeSlider;
 
     public StartMenu() {
         requestFocus();
@@ -51,19 +52,30 @@ class StartMenu extends JFrame {
         // audio
         this.title = new MySoundEffect();
 
+        // Volume slider
+        volumeSlider = new JSlider(JSlider.HORIZONTAL, 0, 100, 50);
+        volumeSlider.setBounds(350, 100, 200, 30);
+        contentPane.add(volumeSlider);
+
+        JLabel volumeLabel = new JLabel("Volume");
+        volumeLabel.setForeground(Color.WHITE); 
+        volumeLabel.setBounds(350, 80, 200, 20);
+        contentPane.add(volumeLabel);
+
         // Username and Password
         JPanel authPanel = new JPanel(new GridLayout(3, 2));
 
-        authPanel.add(new JLabel("Username:"));
+        authPanel.add(new JLabel("                      Username:")).setForeground(Color.WHITE);
         usernameField = new JTextField();
         authPanel.add(usernameField);
 
-        authPanel.add(new JLabel("Password:"));
+        authPanel.add(new JLabel("                      Password:")).setForeground(Color.WHITE);
         passwordField = new JPasswordField();
         authPanel.add(passwordField);
 
-        authPanel.setBounds(50, 150, 300, 100);
+        authPanel.setBounds(-30, 150, 300, 100);
         contentPane.add(authPanel);
+        authPanel.setOpaque(false);
 
         // Credits button
         creditsButton = new JButton("Credits");
