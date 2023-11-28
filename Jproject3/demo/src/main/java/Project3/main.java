@@ -1,8 +1,19 @@
 package Project3;
 
 import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+
 import java.awt.*;
 import java.awt.event.*;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Scanner;
+
 import javax.sound.*;
 
 class MainApplication extends JFrame {
@@ -12,13 +23,14 @@ class MainApplication extends JFrame {
     private JToggleButton[] tb;
     private JLabel drawpane;
     private ImageIcon backgroundImg;
-    private JTextField usernameField;
-    private JPasswordField passwordField;
-    private JButton creditsButton, guideButton;
+    private static JTextField usernameField;
+    private static JPasswordField passwordField;
+    private JButton creditsButton, guideButton, scoresButton;
     private static String selectedDifficulty = "Lunatic";
     private static MySoundEffect title;
     private boolean mute = false;
     private JSlider volumeSlider;
+    
 
     public MainApplication() {
         requestFocus();
@@ -57,10 +69,21 @@ class MainApplication extends JFrame {
         volumeSlider.setBounds(350, 100, 200, 30);
         contentPane.add(volumeSlider);
 
-        JLabel volumeLabel = new JLabel("Volume");
-        volumeLabel.setForeground(Color.WHITE); 
-        volumeLabel.setBounds(350, 80, 200, 20);
-        contentPane.add(volumeLabel);
+        volumeSlider.addChangeListener(new ChangeListener() {
+            @Override
+                public void stateChanged(ChangeEvent e) {
+                // Get the value of the volume slider
+                int sliderValue = volumeSlider.getValue();
+        
+                // Convert the slider value to a float between 0.0 and 1.0
+                float volume = sliderValue / 100.0f;
+
+                // Set the volume in MySoundEffect
+                title.setVolume(volume); // Assuming title is an instance of MySoundEffect
+            }
+
+        });
+        
 
         // Username and Password
         JPanel authPanel = new JPanel(new GridLayout(3, 2));
@@ -72,6 +95,8 @@ class MainApplication extends JFrame {
         authPanel.add(new JLabel("                      Password:")).setForeground(Color.WHITE);
         passwordField = new JPasswordField();
         authPanel.add(passwordField);
+
+        
 
         authPanel.setBounds(-30, 150, 300, 100);
         contentPane.add(authPanel);
@@ -99,6 +124,31 @@ class MainApplication extends JFrame {
                 showGuide();
             }
         });
+
+        // Scoreboard button
+        scoresButton = new JButton("Scoreboard");
+        scoresButton.setBounds(490, 240, 100, 30);
+        contentPane.add(scoresButton);
+
+        scoresButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                showScoreboard();
+            }
+        });
+
+        // Scoreboard button
+        scoresButton = new JButton("Scoreboard");
+        scoresButton.setBounds(490, 240, 100, 30);
+        contentPane.add(scoresButton);
+
+        scoresButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                showScoreboard();
+            }
+        });
+
 
         // Mute and Unmute toggle buttons
         tb = new JToggleButton[2];
@@ -213,6 +263,36 @@ class MainApplication extends JFrame {
         creditsFrame.setVisible(true);
     }
 
+    private void showScoreboard() {
+        JFrame scoreFrame = new JFrame("Scoreboard");
+        scoreFrame.setBounds(400, 400, 400, 200);
+        scoreFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+
+
+
+        JPanel scorePanel = new JPanel();
+        scorePanel.setLayout(new BoxLayout(scorePanel, BoxLayout.Y_AXIS));
+        JScrollPane scrollPane = new JScrollPane(scorePanel);
+        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        scoreFrame.add(scrollPane, BorderLayout.CENTER);
+
+        
+
+        scoreboard sb = new scoreboard();
+        ArrayList<playername> players = sb.getAllPlayers();
+        for (playername player : players) {
+            JLabel playerLabel = new JLabel(player.toString());
+            scorePanel.add(playerLabel); 
+            System.out.println(player.toString());
+            System.out.println("player.toString()");
+        }
+        
+
+        scoreFrame.pack(); 
+        scoreFrame.setLocationRelativeTo(null);
+        scoreFrame.setVisible(true); 
+    }
+
     private void showGuide() {
         JFrame guideFrame = new JFrame("Guide");
         guideFrame.setBounds(300, 300, 400, 200);
@@ -271,6 +351,17 @@ class MainApplication extends JFrame {
         SwingUtilities.invokeLater(() -> {
             new MainApplication();
         });
+        scoreboard sb = new scoreboard();
+        for (playername p : sb.getAllPlayers()) {
+            System.out.println(p); // Assuming player class has a meaningful toString() method
+        }
+    }
+
+    public static String getUsername() {
+        return usernameField.getText();
+    }
+    public static String getPassword() {
+        return passwordField.getText();
     }
 }
 
@@ -325,7 +416,7 @@ class StartButton extends JButton implements MouseListener {
     }
 
     public void startGame() {
-        game gameInstance = new game(MainApplication.getDifficulty());
+        game gameInstance = new game(MainApplication.getDifficulty(), MainApplication.getUsername(), MainApplication.getPassword());
         gameInstance.addKeyListener(new KeyInput(gameInstance));
         MouseInput mouseInput = new MouseInput(gameInstance);
         gameInstance.addMouseListener(mouseInput);
@@ -355,5 +446,83 @@ class StartButton extends JButton implements MouseListener {
         gameInstance.start();
         // startmenu disappear
         SwingUtilities.getWindowAncestor(this).setVisible(false);
+    }
+    
+}
+
+/////////////////Scoreboard 
+
+
+class playername implements Comparable<playername> {
+    private String name;
+    private int score;
+    private String password;
+
+    public playername(String name, int score, String password){
+        this.name = name;
+        this.score = score;
+        this.password = password;
+    }
+
+    @Override
+    public int compareTo(playername other) {
+        return Integer.compare(other.score, this.score);
+    }
+    public String toString() {
+        return "\nName: " + name + ", Score: " + score;
+    }
+}
+
+class scoreboard{
+    static String inputFile = "/Users/person/Jproject3-3/Jproject3/demo/src/main/java/Project3/scores.txt";
+    ArrayList<String> names = new ArrayList<>();
+    ArrayList<String> passwords = new ArrayList<>();
+    ArrayList<Integer> scores = new ArrayList<>();
+    static ArrayList<playername> allplayers = new ArrayList<>();
+    String player, password;
+    public scoreboard(){
+        allplayers.clear();
+        try{
+            Scanner fscanner = new Scanner(new File(inputFile));
+            
+            while(fscanner.hasNext()){
+                String line = fscanner.nextLine();
+                String [] col = line.split(","); 
+                
+                String name = col[0].trim();
+                int score = Integer.parseInt(col[1].trim());
+                String password = col[2].trim();
+
+                playername players = new playername(name, score, password);
+                allplayers.add(players);
+            }
+        
+        Collections.sort(allplayers);
+        System.out.printf("SCORES\n");
+        // for(int index = 0; index < allplayers.size(); index++){
+        //     System.out.printf("%s", allplayers.get(index));
+        // }
+        fscanner.close();
+        }catch (IOException e) {
+            System.err.println("An error occurred while processing the file.");
+            e.printStackTrace();
+        }
+    }
+    public ArrayList<playername> getAllPlayers() {
+        return allplayers;
+    }
+
+    public static void saveScores(String username, int score, String password) {
+        try {
+            FileWriter writer = new FileWriter(new File(inputFile), true);//a pen
+            PrintWriter printWriter = new PrintWriter(writer);
+            printWriter.println(username + ", " + score + ", " + password);
+
+            printWriter.close();
+            writer.close();
+        } catch (IOException e) {
+            System.err.println("An error occurred while writing to the file.");
+            e.printStackTrace();
+        }
     }
 }
