@@ -1,6 +1,9 @@
 package Project3;
 
 import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+
 import java.awt.*;
 import java.awt.event.*;
 import javax.sound.*;
@@ -19,6 +22,7 @@ class MainApplication extends JFrame {
     private static MySoundEffect title;
     private boolean mute = false;
     private JSlider volumeSlider;
+    
 
     public MainApplication() {
         requestFocus();
@@ -57,10 +61,21 @@ class MainApplication extends JFrame {
         volumeSlider.setBounds(350, 100, 200, 30);
         contentPane.add(volumeSlider);
 
-        JLabel volumeLabel = new JLabel("Volume");
-        volumeLabel.setForeground(Color.WHITE); 
-        volumeLabel.setBounds(350, 80, 200, 20);
-        contentPane.add(volumeLabel);
+        volumeSlider.addChangeListener(new ChangeListener() {
+            @Override
+                public void stateChanged(ChangeEvent e) {
+                // Get the value of the volume slider
+                int sliderValue = volumeSlider.getValue();
+        
+                // Convert the slider value to a float between 0.0 and 1.0
+                float volume = sliderValue / 100.0f;
+
+                // Set the volume in MySoundEffect
+                title.setVolume(volume); // Assuming title is an instance of MySoundEffect
+            }
+
+        });
+        
 
         // Username and Password
         JPanel authPanel = new JPanel(new GridLayout(3, 2));
@@ -361,6 +376,7 @@ class StartButton extends JButton implements MouseListener {
         // startmenu disappear
         SwingUtilities.getWindowAncestor(this).setVisible(false);
     }
+    
 }
 
 // class BufferedimageLoader{
