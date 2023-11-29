@@ -33,13 +33,13 @@ import javax.swing.SwingUtilities;
 
 class game extends JPanel implements Runnable
 {
-
     //If change dimensions do not forget to change other code that relies on it
     public static final int WIDTH = 1366;
     //Game is at 766 instead of 768, im sorry.
     public static final int HEIGHT = 768;
     public static String TITLE = "Faraway Voyage of 380 001 Kilometers";
     private String difficulty, username, password;
+    private float volume;
 
     private boolean running = false;
     private boolean isPaused = false;
@@ -193,7 +193,7 @@ class game extends JPanel implements Runnable
     
     //bomb stuff
     private void activateBomb() {
-        bomb.SFX(MyConstants.FILE_BOMB, false, 0.5f);
+        bomb.SFX(MyConstants.FILE_BOMB, false, 0.5f * volume);
         //copy item generation technique from other method
         for (Enemy e : enemies) {
             int enemyType = 0;
@@ -330,7 +330,7 @@ class game extends JPanel implements Runnable
 
     //main method is only for testing here since we are launching the game through main.java
     public static void main(String args[]) {
-        game game = new game("Lunatic", "parityfp", "no");
+        game game = new game("Lunatic", "parityfp", "no", 0.5f*2);
         MouseInput mouseInput = new MouseInput(game);
         game.addKeyListener(new KeyInput(game));
         game.addMouseListener(mouseInput);
@@ -370,10 +370,11 @@ class game extends JPanel implements Runnable
 
         game.start();
     }
-    public game(String difficulty, String username, String password) {
+    public game(String difficulty, String username, String password, float volume) {
         this.difficulty = difficulty;
         this.username = username;
         this.password = password;
+        this.volume = volume * 2;
     }
     public void togglePauseOnWindowLostFocus() {
         if(!isPaused)isPaused = !isPaused;
@@ -418,11 +419,10 @@ class game extends JPanel implements Runnable
     private void tick() {
         if(isPaused)return;
         p.tick();
-        if(gameTickCounter == 1)music.SFX(MyConstants.FILE_THEME, true, 0.25f);//the volume level, try from 0-1
+        if(gameTickCounter == 1)music.SFX(MyConstants.FILE_THEME, true, 0.25f * volume);//the volume level, try from 0-1
         gameTickCounter++;
         System.out.println(bullets.size());
         timeLabel.setText("Time: " + gameTickCounter/60);
-
         if (shooting  && !enemies.isEmpty()) {
             Enemy targetEnemy;
 
@@ -447,7 +447,7 @@ class game extends JPanel implements Runnable
                     }                    
                 }
                 totalBulletsShot++;
-                shoot.SFX(MyConstants.FILE_SHOOT, false, 0.2f);
+                shoot.SFX(MyConstants.FILE_SHOOT, false, 0.2f * volume);
             }
             bulletCounter++;
         }
@@ -492,7 +492,7 @@ class game extends JPanel implements Runnable
         }
         
         //System.out.println("Cycle tick" + currentCycleTick);
-        if (currentCycleTick == plasmaTimer + 120 && HertaSpawn <100) kurukuru.SFX(MyConstants.FILE_KURUKURU, false, 1f);
+        if (currentCycleTick == plasmaTimer + 120 && HertaSpawn <100) kurukuru.SFX(MyConstants.FILE_KURUKURU, false, 1f * volume);
         if (currentCycleTick == cycleLength - 1) {  
             enemyHpMultiplier++;
             System.out.println("Cycle completed" + HertaSpawn);
@@ -534,7 +534,7 @@ class game extends JPanel implements Runnable
         //star spawn, 0.05% per tick, ~3% per second **add extra 0 first
 
         if (p.getPoints() >= starThreshold) {
-            bling.SFX(MyConstants.FILE_BLING, false, 0.7f);
+            bling.SFX(MyConstants.FILE_BLING, false, 0.7f * volume);
             items.add(new star(this, new Random().nextInt(game.WIDTH - 350), 100, 3));
             starThreshold += starThresholdIncrement;
             starThresholdIncrement *= 3; 
@@ -554,7 +554,7 @@ class game extends JPanel implements Runnable
         if (!bombAvailable) {
             bombTimer++;
             if (bombTimer >= bombTimerThreshold - 1) {
-                ready.SFX(MyConstants.FILE_READY, false, 0.5f);
+                ready.SFX(MyConstants.FILE_READY, false, 0.5f * volume);
             }
             if (bombTimer >= bombTimerThreshold) {
                 bombAvailable = true;
@@ -588,7 +588,7 @@ class game extends JPanel implements Runnable
                     // handle collision between bullet and enemy
                     //remove the enemy and the bullet, or mark them for removal
                     //System.out.println("enemy hit");
-                    hit.SFX(MyConstants.FILE_HIT, false, 0.3f);
+                    hit.SFX(MyConstants.FILE_HIT, false, 0.3f * volume);
                 }
             }
         } 
@@ -627,7 +627,7 @@ class game extends JPanel implements Runnable
                             }
                             attractDelay = 60; //after herta killed, how long till attract
                             items.add(new star(this, e.getX(), e.getY(), 3));
-                            bling.SFX(MyConstants.FILE_BLING, false, 0.7f);
+                            bling.SFX(MyConstants.FILE_BLING, false, 0.7f * volume);
                         }
                         if(e instanceof DefaultEnemy)items.add(new point(this, e.getX(), e.getY(), enemyType));
                         enemies.remove(j); 
@@ -651,7 +651,7 @@ class game extends JPanel implements Runnable
             item it = items.get(i);
             it.tick();
             if (p.getBounds().intersects(it.getBounds())) {
-                collect.SFX(MyConstants.FILE_ITEM, false, 0.2f);
+                collect.SFX(MyConstants.FILE_ITEM, false, 0.2f * volume);
                 // increase player's points
                 switch (it.getEnemyType()) {
                     case 0:

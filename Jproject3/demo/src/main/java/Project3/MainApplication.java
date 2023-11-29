@@ -28,6 +28,7 @@ class MainApplication extends JFrame {
     private static String selectedDifficulty = "Lunatic";
     private static MySoundEffect title;
     private JSlider volumeSlider;
+    private static float volume;
     
 
     public MainApplication() {
@@ -70,8 +71,8 @@ class MainApplication extends JFrame {
             @Override
                 public void stateChanged(ChangeEvent e) {
                 int sliderValue = volumeSlider.getValue();
-                float volume = sliderValue / 100.0f;
-                title.setVolume(volume);
+                volume = sliderValue / 100.0f;
+                title.setVolume(volume * 0.5f);
             }
         });
         
@@ -174,7 +175,7 @@ class MainApplication extends JFrame {
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
-                title.SFX(MyConstants.FILE_TITLE, true, 0.5f);
+                title.SFX(MyConstants.FILE_TITLE, true, 0.5f / 2);
             }
         });
     }
@@ -331,6 +332,7 @@ class MainApplication extends JFrame {
     public static String getDifficulty() {
         return selectedDifficulty;
     }
+    public static float getVolume(){return volume;}
 
     public static void stoptitleSound() {
         title.stopSound();
@@ -400,14 +402,14 @@ class StartButton extends JButton implements MouseListener {
 
     public void mouseClicked(MouseEvent e) {
         MainApplication.stoptitleSound();
-        title.SFX(MyConstants.FILE_OK, false, 0.7f);
+        title.SFX(MyConstants.FILE_OK, false, 0.7f * MainApplication.getVolume());
         System.out.println("Game Started");
         // start game
         startGame();
     }
 
     public void startGame() {
-        game gameInstance = new game(MainApplication.getDifficulty(), MainApplication.getUsername(), MainApplication.getPassword());
+        game gameInstance = new game(MainApplication.getDifficulty(), MainApplication.getUsername(), MainApplication.getPassword(), MainApplication.getVolume());
         gameInstance.addKeyListener(new KeyInput(gameInstance));
         MouseInput mouseInput = new MouseInput(gameInstance);
         gameInstance.addMouseListener(mouseInput);

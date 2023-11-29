@@ -7,3 +7,6 @@ java issue, 41500, a
 Guest, 12000, hackermans
 Guest, 59100, hackermans
 Guest, 7500, hackermans
+Guest, 1500, hackermans
+parityfp, 6000, no
+Guest, 1500, hackermans
