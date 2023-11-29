@@ -1,12 +1,3 @@
 Guest, 3000, hackermans
-Guest, 1500, hackermans
-Guest, 3000, hackermans
-parityfp, 6000, a
-Guest, 32600, hackermans
-java issue, 41500, a
-Guest, 12000, hackermans
-Guest, 59100, hackermans
-Guest, 7500, hackermans
-Guest, 1500, hackermans
-parityfp, 6000, no
-Guest, 1500, hackermans
+Guest, 52100, hackermans
+parityfp, 4500, no

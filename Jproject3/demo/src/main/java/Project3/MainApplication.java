@@ -524,5 +524,4 @@ class scoreboard{
             e.printStackTrace();
         }
     }
-
 }

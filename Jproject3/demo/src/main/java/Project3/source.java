@@ -12,10 +12,10 @@ public class source {
 
 interface MyConstants
 {
-    static final String LOCAL_ABS           = "/Users/person/Jproject3/Jproject3/demo";
-    static final String RESOURCEPATH        = LOCAL_ABS + "/src/main/java/Project3/resources/";
+    static final String LOCAL_ABS           = "/Users/person/Jproject3/Jproject3/demo/";
+    static final String RESOURCEPATH        = LOCAL_ABS + "src/main/java/Project3/resources/";
     
-    static final String FILE_SCORES     = LOCAL_ABS + "/src/main/java/Project3/scores.txt";
+    static final String FILE_SCORES     = LOCAL_ABS + "src/main/java/Project3/scores.txt";
 
 
     //----- image files

@@ -33,9 +33,8 @@ import javax.swing.SwingUtilities;
 
 class game extends JPanel implements Runnable
 {
-    //If change dimensions do not forget to change other code that relies on it
+    //game initialization
     public static final int WIDTH = 1366;
-    //Game is at 766 instead of 768, im sorry.
     public static final int HEIGHT = 768;
     public static String TITLE = "Faraway Voyage of 380 001 Kilometers";
     private String difficulty, username, password;
@@ -48,23 +47,17 @@ class game extends JPanel implements Runnable
     private BufferedImage image = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
     private ImageIcon bg;
     private MySoundEffect shoot, hit, bomb, ready, bling, collect, music, kurukuru;
-
-
-
     public JLabel pointsLabel, bombsLabel, pauseLabel, timeLabel, hpLabel;
 
     private player p;
-    public double getPlayerX() {
-        return p.getX();
-    }
+    public double getPlayerX() {return p.getX();}
+    public double getPlayerY() {return p.getY();}
 
-    public double getPlayerY() {
-        return p.getY();
-    }
-
-
-    //amount of bullets currently on screen
+    //lists of all appropriate moving objects currently on screen (except player)
+    //enemy gets created in init()
     private List<Bullet> bullets = new ArrayList<>();
+    private List<item> items = new ArrayList<>();
+    private List<Enemy> enemies;
     private boolean shooting = false;
     private int bulletCounter = 0;
     private int gameTickCounter = 0;
@@ -72,13 +65,10 @@ class game extends JPanel implements Runnable
     private final int bulletThreshold = 5; // rate of the player's bullet
     private int totalBulletsShot = 0;
 
-
-    //stolen variables from magnet
+    //stolen variables from other magnet methods
     private double pspawnX; 
     private double pspawnY; 
-    private int attractDelay = 0; //for Herta
-
-    
+    private int attractDelay = 0; //for Herta's magnet
     private double pdx = 1.0;
     private double pdy;
     private double pspeed = 2;
@@ -86,18 +76,14 @@ class game extends JPanel implements Runnable
     private int plasmaTimer = 1500; //timer till first plasma appears
     private int cycleLength = 1800; // Total length of one cycle
     private int enemyPhaseLength = 1200;
-    
 
-    //same thing for items
-    private List<item> items = new ArrayList<>();
     private int bombTimer = 0;
     private final int bombTimerThreshold = 10 * 60;
     private boolean bombAvailable = false;
     private int starThreshold = 20000; // initial score required for the first star
     private int starThresholdIncrement = 80000;
 
-    //same thing for enemies
-    private List<Enemy> enemies = new ArrayList<>();
+    //enemy stuff
     private int enemySpawnCounter = 0;
     private double enemyHpMultiplier =1;
     //this should be the main difficulty parameter
@@ -234,9 +220,8 @@ class game extends JPanel implements Runnable
         }
     }
     
-
+    //initialize game
     public void init(){
-        //focuses on window instantly, no need to click on window to register key
         requestFocus();
         initDifficulty();
 
@@ -250,18 +235,16 @@ class game extends JPanel implements Runnable
         this.music = new MySoundEffect();
         this.kurukuru = new MySoundEffect();
 
-        //should make a method for this
+        ////Labels
         pointsLabel = new JLabel("");
         pointsLabel.setForeground(Color.WHITE); 
         pointsLabel.setFont(new Font("Monospaced", Font.BOLD, 22));
         pointsLabel.setBounds(WIDTH - 340, 45, 350, 30);
-
         //bomb
         bombsLabel = new JLabel("Bomb:");
         bombsLabel.setForeground(Color.WHITE); 
         bombsLabel.setFont(new Font("Monospaced", Font.BOLD, 22));
         bombsLabel.setBounds(WIDTH - 340, 85, 350, 30);
-
         //pause
         pauseLabel = new JLabel("Time Stopped, ESC to resume") {
             @Override
@@ -269,9 +252,7 @@ class game extends JPanel implements Runnable
                 g.setColor(new Color(255, 255, 255, 100)); // White with alpha
                 g.fillRect(0, 0, getWidth(), getHeight());
                 super.paintComponent(g);
-            }
-
-            
+            }    
         };
         pauseLabel.setOpaque(false);
         pauseLabel.setForeground(Color.WHITE);
@@ -280,37 +261,33 @@ class game extends JPanel implements Runnable
         pauseLabel.setHorizontalAlignment(SwingConstants.CENTER);
         pauseLabel.setVisible(false);
         pauseLabel.setLayout(new BorderLayout());
-
         //time
         timeLabel = new JLabel("Time: ");
         timeLabel.setForeground(Color.WHITE); 
         timeLabel.setFont(new Font("Monospaced", Font.BOLD, 22));
         timeLabel.setBounds(WIDTH - 340, 125, 350, 30);
 
-        //herta HP
+        //herta (boss) HP
         hpLabel = new JLabel("");
         hpLabel.setForeground(Color.WHITE); 
         hpLabel.setFont(new Font("Monospaced", Font.BOLD, 22));
         hpLabel.setBounds(WIDTH - 340, 165, 700, 30);
         
-        this.setLayout(null); // null layout for absolute positioning
+        this.setLayout(null); // null layout for absolute positioning for other components
         this.add(pointsLabel);
         this.add(bombsLabel);
         this.add(pauseLabel);
         this.add(timeLabel);
-        this.add(hpLabel);
-        
+        this.add(hpLabel);   
 
         p = new player(WIDTH / 2, HEIGHT - 32);
         bg = new ImageIcon(MyConstants.FILE_BG);
         enemies = new ArrayList<>();
-        
     }
 
     synchronized public void start() {
         if (running)
             return;
-
         running = true;
         thread = new Thread(this);
         thread.start();
@@ -325,7 +302,6 @@ class game extends JPanel implements Runnable
         } catch (InterruptedException e) {
             e.printStackTrace();
         };
-
     }
 
     //main method is only for testing here since we are launching the game through main.java
@@ -343,7 +319,7 @@ class game extends JPanel implements Runnable
         frame.add(game);
         frame.pack();
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setResizable(false);
+        frame.setResizable(true);
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
 
@@ -365,9 +341,6 @@ class game extends JPanel implements Runnable
                 game.togglePauseOnWindowLostFocus();
             }
         });
-
-
-
         game.start();
     }
     public game(String difficulty, String username, String password, float volume) {
@@ -413,7 +386,6 @@ class game extends JPanel implements Runnable
         System.out.println("powerups: " + p.getUpgrades());
         System.out.println("Cycles: " + (enemyHpMultiplier - 1));
         stop();
-        
     }
 
     private void tick() {
@@ -947,7 +919,6 @@ class game extends JPanel implements Runnable
     }
 }
 
-
 class player {
 
     private double x;
@@ -1026,6 +997,8 @@ class player {
         return y;
     }
 }
+
+///////////////////////////ENEMY CLASSES///////////////////////////
 
 abstract class Enemy {
     protected double x, y;
@@ -1292,6 +1265,8 @@ class Herta extends Enemy{
     }
 }
 
+///////////////////////////PROJECTILE CLASSES///////////////////////////
+
 abstract class Bullet {
     protected double x, y, dx; 
     protected double dy = -1; 
@@ -1456,6 +1431,7 @@ class plasma extends enemyBullet{
 
 }
 
+///////////////////////////ITEM CLASSES///////////////////////////
 
 abstract class item{
     protected BufferedImage item;
@@ -1555,29 +1531,23 @@ class star extends item{
 
 }
 
+///////////////////////////INPUT CLASSES///////////////////////////
 
 class KeyInput extends KeyAdapter {
-
     game game;
-
-    public KeyInput(game game){
-        this.game = game;
-    }
+    public KeyInput(game game){this.game = game; }
 
     public void keyPressed(KeyEvent e){
         game.keyPressed(e);
     }
     public void keyReleased(KeyEvent e){
         game.keyReleased(e);
-    }
-    
+    } 
 }
 
 class MouseInput extends MouseAdapter {
     game game;
-    public MouseInput(game game){
-        this.game = game;
-    }
+    public MouseInput(game game){this.game = game;}
     public void mousePressed(MouseEvent e){
         game.mousePressed(e);
     }
