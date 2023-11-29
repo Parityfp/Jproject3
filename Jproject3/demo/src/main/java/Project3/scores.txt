@@ -1,4 +1,0 @@
-parityfp, 1500, no
-Guest, 1500, hackermans
-Guest, 1500, hackermans
-aaa, 1500, aa
