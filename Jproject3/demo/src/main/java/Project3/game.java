@@ -38,9 +38,8 @@ class game extends JPanel implements Runnable
     public static final int WIDTH = 1366;
     //Game is at 766 instead of 768, im sorry.
     public static final int HEIGHT = 768;
-    public static String TITLE = "game";
+    public static String TITLE = "Faraway Voyage of 380 001 Kilometers";
     private String difficulty, username, password;
-
 
     private boolean running = false;
     private boolean isPaused = false;
@@ -340,7 +339,7 @@ class game extends JPanel implements Runnable
 
         game.setPreferredSize(new Dimension(WIDTH, HEIGHT));
 
-        JFrame frame = new JFrame(game.TITLE);
+        JFrame frame = new JFrame(Project3.game.TITLE);
         frame.add(game);
         frame.pack();
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -1181,7 +1180,6 @@ class shootingEnemy extends Enemy{
         if (y >= 766 - 550){
             y = 766 - 550;
             velY = -velY;
-            //x = 350 + new Random().nextInt(game.WIDTH - 700);
         }
     }
 

@@ -22,19 +22,17 @@ class MainApplication extends JFrame {
     private StartButton startButton;
     private JToggleButton[] tb;
     private JLabel drawpane;
-    private ImageIcon backgroundImg;
     private static JTextField usernameField;
     private static JPasswordField passwordField;
     private JButton creditsButton, guideButton, scoresButton;
     private static String selectedDifficulty = "Lunatic";
     private static MySoundEffect title;
-    private boolean mute = false;
     private JSlider volumeSlider;
     
 
     public MainApplication() {
         requestFocus();
-        setTitle("Start Menu");
+        setTitle("Faraway Voyage of 380 001 Kilometers: Main Menu");
         setBounds(200, 200, 620, 400);
         setLocationRelativeTo(null);
         setVisible(true);
@@ -62,26 +60,19 @@ class MainApplication extends JFrame {
         });
 
         // audio
-        this.title = new MySoundEffect();
+        MainApplication.title = new MySoundEffect();
 
         // Volume slider
         volumeSlider = new JSlider(JSlider.HORIZONTAL, 0, 100, 50);
         volumeSlider.setBounds(350, 100, 200, 30);
         contentPane.add(volumeSlider);
-
         volumeSlider.addChangeListener(new ChangeListener() {
             @Override
                 public void stateChanged(ChangeEvent e) {
-                // Get the value of the volume slider
                 int sliderValue = volumeSlider.getValue();
-        
-                // Convert the slider value to a float between 0.0 and 1.0
                 float volume = sliderValue / 100.0f;
-
-                // Set the volume in MySoundEffect
-                title.setVolume(volume); // Assuming title is an instance of MySoundEffect
+                title.setVolume(volume);
             }
-
         });
         
 
@@ -96,15 +87,13 @@ class MainApplication extends JFrame {
         passwordField = new JPasswordField();
         authPanel.add(passwordField);
 
-        
-
         authPanel.setBounds(-30, 150, 300, 100);
         contentPane.add(authPanel);
         authPanel.setOpaque(false);
 
         // Credits button
         creditsButton = new JButton("Credits");
-        creditsButton.setBounds(490, 320, 100, 30);
+        creditsButton.setBounds(490, 320, 130, 30);
         contentPane.add(creditsButton);
 
         creditsButton.addActionListener(new ActionListener() {
@@ -115,7 +104,7 @@ class MainApplication extends JFrame {
         });
         // Guide button
         guideButton = new JButton("Guide");
-        guideButton.setBounds(490, 280, 100, 30);
+        guideButton.setBounds(490, 280, 130, 30);
         contentPane.add(guideButton);
 
         guideButton.addActionListener(new ActionListener() {
@@ -127,7 +116,7 @@ class MainApplication extends JFrame {
 
         // Scoreboard button
         scoresButton = new JButton("Scoreboard");
-        scoresButton.setBounds(490, 240, 100, 30);
+        scoresButton.setBounds(490, 240, 130, 30);
         contentPane.add(scoresButton);
 
         scoresButton.addActionListener(new ActionListener() {
@@ -145,12 +134,11 @@ class MainApplication extends JFrame {
         tb[1].setName("Unmute");
         tb[1].setSelected(true);
 
-        // ensure cant deselect
+        // add to group so ensure cant deselect
         ButtonGroup buttonGroup = new ButtonGroup();
         buttonGroup.add(tb[0]);
         buttonGroup.add(tb[1]);
 
-        // Set positions and add buttons to the content pane
         tb[0].setBounds(50, 100, 100, 30);
         tb[1].setBounds(200, 100, 100, 30);
         contentPane.add(tb[0]);
@@ -160,9 +148,8 @@ class MainApplication extends JFrame {
             @Override
             public void itemStateChanged(ItemEvent e) {
                 if (e.getStateChange() == ItemEvent.SELECTED) {
-                    tb[1].setSelected(false); // Deselect the other button
+                    tb[1].setSelected(false); // deeselect the other button
                 }
-                mute = true;
                 title.pauseSound();
             }
         });
@@ -171,9 +158,8 @@ class MainApplication extends JFrame {
             @Override
             public void itemStateChanged(ItemEvent e) {
                 if (e.getStateChange() == ItemEvent.SELECTED) {
-                    tb[0].setSelected(false); // Deselect the other button
+                    tb[0].setSelected(false); 
                 }
-                mute = false;
                 title.resume();
             }
         });
@@ -198,7 +184,6 @@ class MainApplication extends JFrame {
         Image scaledImage = originalGif.getImage().getScaledInstance(getWidth(), getHeight(), Image.SCALE_DEFAULT);
         ImageIcon scaledGif = new ImageIcon(scaledImage);
         drawpane = new JLabel(scaledGif);
-        // drawpane.setIcon(backgroundImg);
         drawpane.setLayout(null);
 
         drawpane.setBounds(0, 0, getWidth(), getHeight());
@@ -310,6 +295,8 @@ class MainApplication extends JFrame {
         addImagePanel(MyConstants.FILE_SLIDE5, cardPanel);
         addImagePanel(MyConstants.FILE_SLIDE6, cardPanel);
         addImagePanel(MyConstants.FILE_SLIDE7, cardPanel);
+        addImagePanel(MyConstants.FILE_SLIDE8, cardPanel);
+        addImagePanel(MyConstants.FILE_SLIDE9, cardPanel);
 
         JButton prevButton = new JButton("<<");
         prevButton.addActionListener(e -> cardLayout.previous(cardPanel));
@@ -373,7 +360,7 @@ class StartButton extends JButton implements MouseListener {
     private int width = 100, height = 100;
 
     private ImageIcon startImage;
-    private game gameInstance;
+    //private game gameInstance;
     private MySoundEffect title;
 
     public StartButton(game gameInstance) {
@@ -393,7 +380,7 @@ class StartButton extends JButton implements MouseListener {
         setIcon(startImage);
 
         addMouseListener(this);
-        this.gameInstance = gameInstance;
+        //this.gameInstance = gameInstance;
 
         this.title = new MySoundEffect();
 
@@ -460,12 +447,12 @@ class StartButton extends JButton implements MouseListener {
 class playername implements Comparable<playername> {
     private String name;
     private int score;
-    private String password;
+    //private String password;
 
     public playername(String name, int score, String password){
         this.name = name;
         this.score = score;
-        this.password = password;
+        //this.password = password;
     }
 
     @Override
@@ -500,12 +487,7 @@ class scoreboard{
                 playername players = new playername(name, score, password);
                 allplayers.add(players);
             }
-        
         Collections.sort(allplayers);
-        System.out.printf("SCORES\n");
-        // for(int index = 0; index < allplayers.size(); index++){
-        //     System.out.printf("%s", allplayers.get(index));
-        // }
         fscanner.close();
         }catch (IOException e) {
             System.err.println("An error occurred while processing the file.");
@@ -542,14 +524,3 @@ class scoreboard{
     }
 
 }
-
-// class BufferedimageLoader{
-// private BufferedImage image;
-
-// public BufferedImage loadImage(String path) throws IOException{
-// image = ImageIO.read(getClass().getResource(path));
-// return image;
-
-// }
-
-// }

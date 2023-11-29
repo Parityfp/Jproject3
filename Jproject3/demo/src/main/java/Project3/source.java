@@ -1,18 +1,21 @@
 package Project3;
 
-import java.awt.Image;
-import javax.swing.ImageIcon;
-import javax.sound.sampled.*; 
 import java.io.File;
+
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
+import javax.sound.sampled.FloatControl;
 public class source {
     
 }
 
 interface MyConstants
 {
-    static final String RESOURCEPATH        = "src/main/java/Project3/resources/";
+    static final String LOCAL_ABS           = "/Users/person/Jproject3/Jproject3/demo";
+    static final String RESOURCEPATH        = LOCAL_ABS + "/src/main/java/Project3/resources/";
     
-    static final String FILE_SCORES     = "src/main/java/Project3/scores.txt";
+    static final String FILE_SCORES     = LOCAL_ABS + "/src/main/java/Project3/scores.txt";
 
 
     //----- image files
@@ -38,6 +41,8 @@ interface MyConstants
     static final String FILE_SLIDE5     = RESOURCEPATH + "mspaint5.png";
     static final String FILE_SLIDE6     = RESOURCEPATH + "mspaint6.png";
     static final String FILE_SLIDE7     = RESOURCEPATH + "mspaint7.png";
+    static final String FILE_SLIDE8     = RESOURCEPATH + "mspaint8.png";
+    static final String FILE_SLIDE9     = RESOURCEPATH + "mspaint9.png";
 
 
 //////////////////////////////////// ITEMS ////////////////////////////////////
@@ -72,32 +77,27 @@ interface MyConstants
 //for handling audio
 class MySoundEffect
 {
-private long lastSoundTime = 0;
     private Clip clip;
-    private final long SOUND_COOLDOWN = 10; 
     private long PausePosition; 
-    private boolean isClipPlaying = false;
     public synchronized void SFX(String soundFileName, boolean loop, float volume) {
-        long currentTime = System.currentTimeMillis();
-        if (currentTime - lastSoundTime > SOUND_COOLDOWN && !isClipPlaying) {
-            lastSoundTime = currentTime;
-            try {
-            File soundFile = new File(soundFileName);
-            AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(soundFile);
-            clip = AudioSystem.getClip();
-            clip.open(audioInputStream);
-            setVolume(volume); 
-            clip.setMicrosecondPosition(0);
-            if (loop) {
-                isClipPlaying = true;
-                clip.loop(Clip.LOOP_CONTINUOUSLY);
+    try {
+        File soundFile = new File(soundFileName);
+        AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(soundFile);
+        clip = AudioSystem.getClip();
+        clip.open(audioInputStream);
+        setVolume(volume);
+        clip.setMicrosecondPosition(0);
+
+        if (loop) {
+            clip.loop(Clip.LOOP_CONTINUOUSLY);
             } else {
                 clip.start();
             }
-
-        } catch (Exception e) {e.printStackTrace(); }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
+
     public void setVolume(float volume) { // Volume is a value between 0 and 1
         if (clip != null) {
             FloatControl gainControl = (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
@@ -112,14 +112,12 @@ private long lastSoundTime = 0;
         if (clip != null) {
             clip.stop();
             clip.setMicrosecondPosition(0); 
-            isClipPlaying = false;
         }
     }
     public synchronized void pauseSound() {
         if (clip != null && clip.isRunning()) {
             PausePosition = clip.getMicrosecondPosition(); 
             clip.stop();
-            isClipPlaying = false;
         }
     }
     public void resume() {
